@@ -6,7 +6,7 @@ public interface Histogram {
   double getRank(float v);
 
   default void consume(CDF.Datastream ds) {
-    while(ds.hasValue()) {
+    while(ds.hasNext()) {
       addValue(ds.nextValue());
     }
   }

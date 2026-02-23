@@ -34,7 +34,7 @@ public class Measure {
     }
   }
 
-  public static Result evaluateMultiplicativeSelectivityDifference(Histogram h1, Histogram h2, CDF.Datastream values, float rangeWidth) {
+  public static Result evaluateMultiplicativeSelectivityDifference(Histogram h1, Histogram h2, FloatIterator values, float rangeWidth) {
     double diff = 0;
 
     int zeroH1 = 0;
@@ -42,7 +42,11 @@ public class Measure {
     int zeroBoth = 0;
     int valid = 0;
 
-    for (float v : values) {
+    int count = 0;
+    while (values.hasNext()) {
+      float v = values.nextValue();
+      count += 1;
+
       double r1 = h1.getRank(v+rangeWidth) - h1.getRank(v);
       double r2 = h2.getRank(v+rangeWidth) - h2.getRank(v);
       r1 = Math.max(r1, h1.getMinRankDifference());
@@ -71,7 +75,7 @@ public class Measure {
       valid++;
     }
     diff /= Math.log(10);
-    return new Result(diff / valid, values.length, zeroH1, zeroH2, zeroBoth);
+    return new Result(diff / valid, count, zeroH1, zeroH2, zeroBoth);
   }
 
 }

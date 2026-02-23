@@ -55,12 +55,13 @@ public class CDF {
     return new CDF(points);
   }
 
-  static class Datastream {
+  static class Datastream implements FloatIterator {
     private Point[] ps;
     private int[] remaining;
     private int remainingCount;
     public Random rnd;
 
+    @Override
     public float nextValue() {
       if (remainingCount == 0) {
         throw new IllegalStateException("The datastream has already been consumed");
@@ -79,7 +80,8 @@ public class CDF {
       throw new IllegalStateException();
     }
 
-    public boolean hasValue() {
+    @Override
+    public boolean hasNext() {
       return remainingCount > 0;
     }
   }

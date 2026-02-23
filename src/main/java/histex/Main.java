@@ -25,10 +25,10 @@ public class Main {
 
     System.out.println();
     float rangeWidth = 0.5f;
-    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, kll, h.getBucketEnds(), rangeWidth)));
+    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, kll, FloatIterator.of(h.getBucketEnds()), rangeWidth)));
     System.out.println();
     System.out.println();
-    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, tdigest, h.getBucketEnds(), rangeWidth)));
+    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, tdigest, FloatIterator.of(h.getBucketEnds()), rangeWidth)));
   }
 
   private static String fmt(double v) {
