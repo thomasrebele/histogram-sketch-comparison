@@ -22,14 +22,13 @@ class CDFTest {
         """);
 
     int n = 100;
-    Random rnd = new Random(123);
-    CDF.Datastream ds = cdf.makeStream(n, rnd);
+    CDF.Datastream ds = cdf.prepareStream(n, () -> new Random(123)).get();
 
     float[] result = new float[n];
     for (int i=0; i<n; i++) {
       result[i] = ds.nextValue();
     }
-    IllegalStateException ex = assertThrows(IllegalStateException.class, () -> ds.nextValue());
+    IllegalStateException ex = assertThrows(IllegalStateException.class, ds::nextValue);
     assertTrue(ex.getMessage().contains("already been consumed"));
 
     assertEquals(30, countLE(result, 200f));
@@ -67,8 +66,8 @@ class CDFTest {
         """);
 
     int n = 100;
-    CDF.Datastream ds1 = cdf1.makeStream(n, new Random(123));
-    CDF.Datastream ds2 = cdf2.makeStream(n, new Random(123));
+    CDF.Datastream ds1 = cdf1.prepareStream(n, ()->new Random(123)).get();
+    CDF.Datastream ds2 = cdf2.prepareStream(n, ()->new Random(123)).get();
 
     for (int i=0; i<n; i++) {
       float f1 = ds1.nextValue();
@@ -88,7 +87,7 @@ class CDFTest {
         """);
 
     int n = 100;
-    CDF.Datastream ds = cdf.makeStream(n, new Random(123));
+    CDF.Datastream ds = cdf.prepareStream(n, ()->new Random(123)).get();
     FixedBucketHistogram h = new FixedBucketHistogram(cdf.getBuckets());
 
     for (int i=0; i<n; i++) {

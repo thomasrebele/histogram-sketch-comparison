@@ -2,6 +2,7 @@ package histex;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class CDF {
   /**
@@ -54,15 +55,11 @@ public class CDF {
     return new CDF(points);
   }
 
-  public static class Datastream {
+  static class Datastream {
     private Point[] ps;
     private int[] remaining;
     private int remainingCount;
-    private Random rnd;
-
-    private Datastream() {
-      // should only be instantiated via a CDF
-    }
+    public Random rnd;
 
     public float nextValue() {
       if (remainingCount == 0) {
@@ -118,7 +115,7 @@ public class CDF {
     if (ps[ps.length-1].y != 1) throw new IllegalArgumentException("there must be a minimal point with rank 1");
   }
 
-  public Datastream makeStream(int n, Random rnd) {
+  public Supplier<Datastream> prepareStream(int n, Supplier<Random> rndSupplier) {
     int[] remaining = new int[ps.length+1];
     var max = 0;
     var maxi = 0;
@@ -142,13 +139,15 @@ public class CDF {
     System.out.println("difference: " + diff);
     remaining[maxi] -= diff;
 
-    Datastream datastream = new Datastream();
-    datastream.rnd = rnd;
-    datastream.ps = new Point[ps.length];
-    System.arraycopy(ps, 0, datastream.ps, 0, ps.length);
-    datastream.remainingCount = n;
-    datastream.remaining = remaining;
-    return datastream;
+    return () -> {
+      Datastream ds = new Datastream();
+      ds.ps = new Point[ps.length];
+      System.arraycopy(ps, 0, ds.ps, 0, ps.length);
+      ds.remaining = Arrays.copyOf(remaining, remaining.length);
+      ds.remainingCount = n;
+      ds.rnd = rndSupplier.get();
+      return ds;
+    };
   }
 
 
