@@ -3,13 +3,17 @@ package histex;
 public interface Histogram {
   void addValue(float v);
 
+  double getRank(float v);
+
   default void consume(CDF.Datastream ds) {
     while(ds.hasValue()) {
       addValue(ds.nextValue());
     }
   }
 
-  double getRank(float v);
+  default double getMinRankDifference() {
+    return 0.0;
+  }
 
   default double[] getRanks(float[] values) {
     double[] result = new double[values.length];

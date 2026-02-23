@@ -24,10 +24,11 @@ public class Main {
     System.out.println(Arrays.toString(tdigest.getRanks(h.getBucketEnds())));
 
     System.out.println();
-    System.out.println(fmt(Measure.evaluateMultiplicativeDifference(h, kll, h.getBucketEnds())));
+    float rangeWidth = 0.5f;
+    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, kll, h.getBucketEnds(), rangeWidth)));
     System.out.println();
     System.out.println();
-    System.out.println(fmt(Measure.evaluateMultiplicativeDifference(h, tdigest, h.getBucketEnds())));
+    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, tdigest, h.getBucketEnds(), rangeWidth)));
   }
 
   private static String fmt(double v) {

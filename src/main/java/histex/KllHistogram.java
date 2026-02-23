@@ -22,6 +22,11 @@ public class KllHistogram implements Histogram {
     return kll.getRank(v);
   }
 
+  @Override
+  public double getMinRankDifference() {
+    return kll.getNormalizedRankError(false);
+  }
+
   public void debug() {
     System.out.println(
         Arrays.toString(kll.getSortedView().getCumulativeWeights()));
