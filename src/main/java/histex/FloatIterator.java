@@ -17,6 +17,10 @@ interface FloatIterator {
     };
   }
 
+  static FloatIterator sequence(float start, float end, int n) {
+    return of(new EquiWidthHistogram(start, end, n).getBucketEnds());
+  }
+
   float nextValue();
 
   boolean hasNext();

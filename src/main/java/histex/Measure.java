@@ -2,7 +2,7 @@ package histex;
 
 public class Measure {
 
-  public static double evaluateMultiplicativeDifference(Histogram h1, Histogram h2, float[] values) {
+  public static double evaluateMultiplicativeDifference(RankEstimator h1, RankEstimator h2, float[] values) {
     double diff = 0;
 
     for (float v : values) {
@@ -34,7 +34,7 @@ public class Measure {
     }
   }
 
-  public static Result evaluateMultiplicativeSelectivityDifference(Histogram h1, Histogram h2, FloatIterator values, float rangeWidth) {
+  public static Result evaluateMultiplicativeSelectivityDifference(RankEstimator h1, RankEstimator h2, FloatIterator values, float rangeWidth) {
     double diff = 0;
 
     int zeroH1 = 0;
