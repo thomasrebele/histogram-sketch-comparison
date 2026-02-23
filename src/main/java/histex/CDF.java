@@ -81,9 +81,13 @@ public class CDF {
       }
       throw new IllegalStateException();
     }
+
+    public boolean hasValue() {
+      return remainingCount > 0;
+    }
   }
 
-  private record Point(float x, float y) implements Comparable<Point> {
+  record Point(float x, float y) implements Comparable<Point> {
     @Override
     public int compareTo(Point o) {
       return Float.compare(this.x, o.x);
