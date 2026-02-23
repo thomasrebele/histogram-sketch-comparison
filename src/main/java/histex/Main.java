@@ -16,7 +16,21 @@ public class Main {
     KllHistogram kll = new KllHistogram();
     kll.consume(ds.get());
 
+    TDigestHistogram tdigest = new TDigestHistogram();
+    tdigest.consume(ds.get());
+
     System.out.println(Arrays.toString(h.getRanks(h.getBucketEnds())));
     System.out.println(Arrays.toString(kll.getRanks(h.getBucketEnds())));
+    System.out.println(Arrays.toString(tdigest.getRanks(h.getBucketEnds())));
+
+    System.out.println();
+    System.out.println(fmt(Measure.evaluateMultiplicativeDifference(h, kll, h.getBucketEnds())));
+    System.out.println();
+    System.out.println();
+    System.out.println(fmt(Measure.evaluateMultiplicativeDifference(h, tdigest, h.getBucketEnds())));
+  }
+
+  private static String fmt(double v) {
+    return String.format("%4.4g", v);
   }
 }
