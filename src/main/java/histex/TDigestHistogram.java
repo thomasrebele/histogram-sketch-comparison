@@ -1,0 +1,23 @@
+package histex;
+
+import org.apache.datasketches.tdigest.TDigestDouble;
+
+public class TDigestHistogram implements Histogram {
+
+  private final TDigestDouble tdigest;
+
+  public TDigestHistogram() {
+    this.tdigest = new TDigestDouble();
+
+  }
+
+  @Override
+  public void addValue(float v) {
+    tdigest.update(v);
+  }
+
+  @Override
+  public double getRank(float v) {
+    return tdigest.getRank(v);
+  }
+}
