@@ -28,7 +28,7 @@ public class CDF {
 
   /**
    * Creates a CDF from values with a specified rank.
-   *
+   * <p>
    * <code>
    *   x1 y1
    *   x2 y2
