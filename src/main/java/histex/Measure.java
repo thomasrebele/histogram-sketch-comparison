@@ -6,8 +6,8 @@ public class Measure {
     double diff = 0;
 
     for (float v : values) {
-      double r1 = h1.getRank(v);
-      double r2 = h2.getRank(v);
+      double r1 = h1.getNormalizedRank(v);
+      double r2 = h2.getNormalizedRank(v);
 
       if (r2 > r1) {
         double tmp = r2;
@@ -47,10 +47,15 @@ public class Measure {
       float v = values.nextValue();
       count += 1;
 
-      double r1 = h1.getRank(v+rangeWidth) - h1.getRank(v);
-      double r2 = h2.getRank(v+rangeWidth) - h2.getRank(v);
-      r1 = Math.max(r1, h1.getMinRankDifference());
-      r2 = Math.max(r2, h2.getMinRankDifference());
+      double r1e = h1.getNormalizedRank(v + rangeWidth);
+      double r1s = h1.getNormalizedRank(v);
+      double r1 = r1e - r1s;
+      double r2e = h2.getNormalizedRank(v + rangeWidth);
+      double r2s = h2.getNormalizedRank(v);
+      double r2 = r2e - r2s;
+      r1 = Math.max(r1, h1.getMinNormalizedRankDifference());
+      r2 = Math.max(r2, h2.getMinNormalizedRankDifference());
+      System.out.println("ratio: " + (r1/r2) + "      r1 " + r1 + "  r2 " + r2 + "   r1es " + r1e + " " + r1s + "  r2es " + r2e + " " + r2s);
       if (r1 == 0 && r2 == 0) {
         zeroBoth += 1;
         continue;
@@ -70,7 +75,6 @@ public class Measure {
         r1 = tmp;
       }
 
-      //System.out.println("ratio: " + (r1/r2));
       diff += Math.log(r1) - Math.log(r2);
       valid++;
     }

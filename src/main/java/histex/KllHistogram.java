@@ -18,12 +18,12 @@ public class KllHistogram implements Histogram {
   }
 
   @Override
-  public double getRank(float v) {
+  public double getNormalizedRank(float v) {
     return kll.getRank(v);
   }
 
   @Override
-  public double getMinRankDifference() {
+  public double getMinNormalizedRankDifference() {
     return kll.getNormalizedRankError(false);
   }
 

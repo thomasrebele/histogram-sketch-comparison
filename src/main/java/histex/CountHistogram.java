@@ -28,15 +28,26 @@ public abstract class CountHistogram implements Histogram {
   }
 
   @Override
-  public double getRank(float v) {
+  public double getNormalizedRank(float v) {
     long c = 0;
-    for (int i=0; i<count.length; i++) {
-      float bucketStart = getBucketStart(i);
-      if (v <= bucketStart) {break;}
+    int i;
+    for (i=0; i<count.length; i++) {
+      float bucketEnd = getBucketEnd(i);
+      if (v <= bucketEnd) {break;}
       c += count[i];
     }
 
-    return (double)c / n;
+    double base = (double) c;
+    double interp = 0;
+
+    if (i >= 0) {
+      float bucketStart = getBucketStart(i);
+      float bucketEnd = getBucketEnd(i);
+      interp = (v - bucketStart) / (bucketEnd - bucketStart) * count[i];
+      interp = Math.clamp(interp, 0, count[i]);
+    }
+
+    return (base + interp)/n;
   }
 
   @Override

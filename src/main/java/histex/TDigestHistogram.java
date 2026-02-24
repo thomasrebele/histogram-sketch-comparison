@@ -17,7 +17,7 @@ public class TDigestHistogram implements Histogram {
   }
 
   @Override
-  public double getRank(float v) {
+  public double getNormalizedRank(float v) {
     return tdigest.getRank(v);
   }
 

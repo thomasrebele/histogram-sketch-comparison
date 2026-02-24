@@ -36,7 +36,12 @@ public class EquiWidthHistogram extends CountHistogram {
   }
 
   @Override
-  public double getMinRankDifference() {
-    return bucketWidth;
+  public double getMinNormalizedRankDifference() {
+    return 0;
+    //int max = 0;
+    //for (int i=0; i<count.length; i++) {
+    //  max = Math.max(max, count[i]);
+    //}
+    //return (double)max / n;
   }
 }

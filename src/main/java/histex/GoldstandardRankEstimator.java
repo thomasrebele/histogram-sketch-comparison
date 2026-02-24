@@ -19,10 +19,10 @@ public class GoldstandardRankEstimator implements RankEstimator {
   }
 
   @Override
-  public double getRank(float value) {
+  public double getNormalizedRank(float value) {
     // TODO tr how to handle duplicate values?
 
     int i = Collections.binarySearch(values, value);
-    return i < 0 ? -(i+1) : i;
+    return (double)(i < 0 ? -(i+1) : i) / values.size();
   }
 }
