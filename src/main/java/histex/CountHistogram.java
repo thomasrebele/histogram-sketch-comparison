@@ -40,7 +40,7 @@ public abstract class CountHistogram implements Histogram {
     double base = (double) c;
     double interp = 0;
 
-    if (i >= 0) {
+    if (i < count.length) {
       float bucketStart = getBucketStart(i);
       float bucketEnd = getBucketEnd(i);
       interp = (v - bucketStart) / (bucketEnd - bucketStart) * count[i];
