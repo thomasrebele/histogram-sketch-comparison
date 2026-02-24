@@ -27,6 +27,11 @@ public class KllHistogram implements Histogram {
     return kll.getNormalizedRankError(false);
   }
 
+  @Override
+  public int getMemoryUsageInBytes() {
+    return kll.getSerializedSizeBytes();
+  }
+
   public void debug() {
     System.out.println(
         Arrays.toString(kll.getSortedView().getCumulativeWeights()));

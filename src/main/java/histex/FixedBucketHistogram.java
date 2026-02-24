@@ -29,4 +29,9 @@ public class FixedBucketHistogram extends CountHistogram {
   float getBucketStart(int bucketIndex) {
     return buckets[bucketIndex];
   }
+
+  @Override
+  public int getMemoryUsageInBytes() {
+    return Float.BYTES * buckets.length + super.getMemoryUsageInBytes();
+  }
 }

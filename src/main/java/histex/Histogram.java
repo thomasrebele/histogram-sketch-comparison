@@ -3,6 +3,8 @@ package histex;
 public interface Histogram extends RankEstimator {
   void addValue(float v);
 
+  int getMemoryUsageInBytes();
+
 
   default void consume(CDF.Datastream ds) {
     while(ds.hasNext()) {

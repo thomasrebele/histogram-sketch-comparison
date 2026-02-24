@@ -6,30 +6,57 @@ import java.util.function.Supplier;
 
 public class Main {
   public static void main(String[] args) {
-    CDF uniform = CDFFactory.uniform(100, 1000);
+    CDF uniform = CDFFactory.gaussian(500, 100, 3000);
+    Supplier<CDF.Datastream> ds = uniform.prepareStream(1000000, ()->new Random(1234));
 
-    EquiWidthHistogram h = new EquiWidthHistogram(100, 1000, 2000);
+    System.out.println("memory usage in bytes:");
 
-    Supplier<CDF.Datastream> ds = uniform.prepareStream(100000, ()->new Random(123));
-    h.consume(ds.get());
+    EquiWidthHistogram h1 = new EquiWidthHistogram(100, 1000, 600);
+    h1.consume(ds.get());
+    System.out.println("equi-width histogram with " + h1.buckets + " buckets, size: " + h1.getMemoryUsageInBytes());
+
+    EquiWidthHistogram h2 = new EquiWidthHistogram(100, 1000, 10);
+    h2.consume(ds.get());
+    System.out.println("equi-width histogram with " + h2.buckets + " buckets, size: " + h2.getMemoryUsageInBytes());
 
     KllHistogram kll = new KllHistogram();
     kll.consume(ds.get());
+    System.out.println("KLL sketch size: " + kll.getMemoryUsageInBytes());
 
     TDigestHistogram tdigest = new TDigestHistogram();
     tdigest.consume(ds.get());
+    System.out.println("t-digest sketch size: " + tdigest.getMemoryUsageInBytes());
 
-    System.out.println(Arrays.toString(h.getRanks(h.getBucketEnds())));
-    System.out.println(Arrays.toString(kll.getRanks(h.getBucketEnds())));
-    System.out.println(Arrays.toString(tdigest.getRanks(h.getBucketEnds())));
+    //System.out.println(Arrays.toString(h1.getRanks(h1.getBucketEnds())));
+    //System.out.println(Arrays.toString(kll.getRanks(h1.getBucketEnds())));
+    //System.out.println(Arrays.toString(tdigest.getRanks(h1.getBucketEnds())));
 
+    GoldstandardRankEstimator e = new GoldstandardRankEstimator(ds);
+
+    System.out.println("compare the multiplicative accuracy of range predicate selectivity");
     System.out.println();
-    float rangeWidth = 0.5f;
-    Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(100, 1000, 10000);
-    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, kll, sequence.get(), rangeWidth)));
-    System.out.println();
-    System.out.println();
-    System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(h, tdigest, sequence.get(), rangeWidth)));
+    float rangeWidth = 0.00001f;
+    while (rangeWidth < 1000) {
+      System.out.println();
+      System.out.println();
+      System.out.println("--------------------------------------------------------------------------------");
+      System.out.println("range width " + rangeWidth);
+      final float rw = rangeWidth;
+      Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(100, 1000 - rw, 10000);
+      System.out.println("equi-width histogram with " + h1.buckets);
+      System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h1, sequence.get(), rangeWidth)));
+      System.out.println();
+      System.out.println("equi-width histogram with " + h2.buckets);
+      System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h2, sequence.get(), rangeWidth)));
+      System.out.println();
+      System.out.println("KLL sketch");
+      System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, kll, sequence.get(), rangeWidth)));
+      System.out.println();
+      System.out.println("t-digest sketch");
+      System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, tdigest, sequence.get(), rangeWidth)));
+
+      rangeWidth *= 2;
+    }
   }
 
   private static String fmt(double v) {

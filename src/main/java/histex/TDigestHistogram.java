@@ -20,4 +20,9 @@ public class TDigestHistogram implements Histogram {
   public double getRank(float v) {
     return tdigest.getRank(v);
   }
+
+  @Override
+  public int getMemoryUsageInBytes() {
+    return tdigest.toByteArray().length;
+  }
 }

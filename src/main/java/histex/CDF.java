@@ -63,7 +63,7 @@ public class CDF {
 
     @Override
     public float nextValue() {
-      if (remainingCount == 0) {
+      if (remainingCount <= 0) {
         throw new IllegalStateException("The datastream has already been consumed");
       }
       int v = rnd.nextInt(remainingCount);
@@ -114,38 +114,52 @@ public class CDF {
       y = p.y;
     }
 
-    if (ps[ps.length-1].y != 1) throw new IllegalArgumentException("there must be a minimal point with rank 1");
+    if (ps[ps.length-1].y != 1) throw new IllegalArgumentException("there must be a point with rank 1");
   }
 
   public Supplier<Datastream> prepareStream(int n, Supplier<Random> rndSupplier) {
-    int[] remaining = new int[ps.length+1];
-    var max = 0;
-    var maxi = 0;
+    int[] bucketSize = new int[ps.length-1];
+    float[] remaining = new float[ps.length-1];
+    float remainingTotal = 0;
     int count = 0;
     var y = 0f;
-    for (int i=0; i<ps.length; i++) {
+    for (int i=0; i<ps.length-1; i++) {
       var p = ps[i];
       var part = p.y - y;
       y = p.y;
-
-      remaining[i] = Math.round(n * part);
-      if (remaining[i] > max) {
-        max = remaining[i];
-        maxi = i;
-      }
-
-      count += remaining[i];
+      float exact = n * part;
+      bucketSize[i] = (int) Math.floor(exact);
+      remaining[i] = exact - bucketSize[i];
+      remainingTotal += remaining[i];
+      count += bucketSize[i];
     }
 
+    Random random = rndSupplier.get();
     int diff = n-count;
-    System.out.println("difference: " + diff);
-    remaining[maxi] -= diff;
+    outer: for (int i=0; i<diff; i++) {
+      if (remainingTotal <= 0) {
+        int bi = random.nextInt(ps.length-1);
+        bucketSize[bi] += 1;
+        continue;
+      }
+
+      float v = random.nextFloat(0, remainingTotal);
+      for (int j=0; j<ps.length-1; j++) {
+        if (v < remaining[j]) {
+          bucketSize[j] += 1;
+          remainingTotal -= remaining[j];
+          remaining[j] = 0;
+          continue outer;
+        }
+        v -= remaining[j];
+      }
+    }
 
     return () -> {
       Datastream ds = new Datastream();
       ds.ps = new Point[ps.length];
       System.arraycopy(ps, 0, ds.ps, 0, ps.length);
-      ds.remaining = Arrays.copyOf(remaining, remaining.length);
+      ds.remaining = Arrays.copyOf(bucketSize, bucketSize.length);
       ds.remainingCount = n;
       ds.rnd = rndSupplier.get();
       return ds;

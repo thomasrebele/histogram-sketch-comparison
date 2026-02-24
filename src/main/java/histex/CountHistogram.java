@@ -62,4 +62,8 @@ public abstract class CountHistogram implements Histogram {
     return result;
   }
 
+  @Override
+  public int getMemoryUsageInBytes() {
+    return Integer.BYTES * count.length;
+  }
 }

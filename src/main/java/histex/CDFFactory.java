@@ -1,6 +1,7 @@
 package histex;
 
 import histex.CDF.Point;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class CDFFactory {
 
@@ -12,9 +13,28 @@ public class CDFFactory {
     return new CDF(ps);
   }
 
-  public static CDF gaussian(float mean, float stddev) {
-    // TODO tr implement
-    Point[] ps = new Point[]{};
+  public static CDF gaussian(float mean, float stddev, int buckets) {
+    NormalDistribution normal = new NormalDistribution(mean, stddev);
+
+    float start = mean-3*stddev;
+    float end = mean+3*stddev;
+
+    EquiWidthHistogram h = new EquiWidthHistogram(start, end, buckets);
+
+    for(int i=0; i<h.buckets; i++) {
+    }
+
+    Point[] ps = new Point[h.buckets+1];
+    for (int i=0; i<h.buckets; i++) {
+      float v = h.getBucketStart(i);
+      float e = h.getBucketEnd(i);
+      double v1 = normal.cumulativeProbability(e);
+
+      ps[i] = new Point(v, (float) v1);
+    }
+    ps[h.buckets-1] = new Point(end, 1.0f);
+    ps[h.buckets] = new Point(end, 1.0f);
+
     return new CDF(ps);
   }
 

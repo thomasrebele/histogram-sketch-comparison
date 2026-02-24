@@ -74,6 +74,8 @@ class CDFTest {
       float f2 = ds2.nextValue();
       assertEquals(f1, f2);
     }
+
+    assertEquals(ds1.hasNext(), ds2.hasNext());
   }
 
   @Test
