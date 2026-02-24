@@ -22,12 +22,12 @@ public class Measure {
     return diff / values.length;
   }
 
-  public record Result(double scaleDiff, int n, int zeroH1, int zeroH2, int zeroBoth) {
+  public record Result(double scaleDiff, int ranges, int zeroH1, int zeroH2, int zeroBoth) {
     @Override
     public String toString() {
       return "Result{"
           + "scaleDiff=" + String.format("%4.4f", scaleDiff)
-          + ", n=" + n
+          + ", ranges=" + ranges
           + ", zeroH1=" + zeroH1
           + ", zeroH2=" + zeroH2
           + ", zeroBoth=" + zeroBoth + '}';

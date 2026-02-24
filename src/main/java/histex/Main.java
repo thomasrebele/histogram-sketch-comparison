@@ -15,9 +15,13 @@ public class Main {
     h1.consume(ds.get());
     System.out.println("equi-width histogram with " + h1.buckets + " buckets, size: " + h1.getMemoryUsageInBytes());
 
-    EquiWidthHistogram h2 = new EquiWidthHistogram(100, 1000, 10);
+    EquiWidthHistogram h2 = new EquiWidthHistogram(100, 1000, 200);
     h2.consume(ds.get());
     System.out.println("equi-width histogram with " + h2.buckets + " buckets, size: " + h2.getMemoryUsageInBytes());
+
+    EquiWidthHistogram h3 = new EquiWidthHistogram(100, 1000, 10);
+    h3.consume(ds.get());
+    System.out.println("equi-width histogram with " + h3.buckets + " buckets, size: " + h3.getMemoryUsageInBytes());
 
     KllHistogram kll = new KllHistogram();
     kll.consume(ds.get());
@@ -45,12 +49,19 @@ public class Main {
       Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(100, 1000 - rw, 10000);
       System.out.println("equi-width histogram with " + h1.buckets);
       System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h1, sequence.get(), rangeWidth)));
+
       System.out.println();
       System.out.println("equi-width histogram with " + h2.buckets);
       System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h2, sequence.get(), rangeWidth)));
+
+      System.out.println();
+      System.out.println("equi-width histogram with " + h3.buckets);
+      System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h3, sequence.get(), rangeWidth)));
+
       System.out.println();
       System.out.println("KLL sketch");
       System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, kll, sequence.get(), rangeWidth)));
+
       System.out.println();
       System.out.println("t-digest sketch");
       System.out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, tdigest, sequence.get(), rangeWidth)));
