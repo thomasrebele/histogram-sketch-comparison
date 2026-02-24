@@ -55,7 +55,7 @@ public class Measure {
       double r2 = r2e - r2s;
       r1 = Math.max(r1, h1.getMinNormalizedRankDifference());
       r2 = Math.max(r2, h2.getMinNormalizedRankDifference());
-      System.out.println("ratio: " + (r1/r2) + "      r1 " + r1 + "  r2 " + r2 + "   r1es " + r1e + " " + r1s + "  r2es " + r2e + " " + r2s);
+      //System.out.println("ratio: " + (r1/r2) + "      r1 " + r1 + "  r2 " + r2 + "   r1es " + r1e + " " + r1s + "  r2es " + r2e + " " + r2s);
       if (r1 == 0 && r2 == 0) {
         zeroBoth += 1;
         continue;
