@@ -7,7 +7,7 @@ public class TDigestHistogram implements Histogram {
   private final TDigestDouble tdigest;
 
   public TDigestHistogram() {
-    this.tdigest = new TDigestDouble();
+    this.tdigest = new TDigestDouble((short)120);
 
   }
 
