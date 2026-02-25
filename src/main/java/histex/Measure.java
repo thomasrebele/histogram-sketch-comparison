@@ -37,7 +37,10 @@ public class Measure {
   }
 
   public record RatioResult(double r1, double r2, double r1s, double r1e, double r2s, double r2e) {
-
+    @Override
+    public String toString() {
+      return "r1 " + r1 + "  r2 " + r2 + "   r1: [" + r1s + "," + r1e  + "], r2: [" + r2s + "," + r2e + "]";
+    }
   }
 
   public static Result evaluateMultiplicativeSelectivityDifference(RankEstimator h1, RankEstimator h2, FloatIterator values, float rangeWidth) {
