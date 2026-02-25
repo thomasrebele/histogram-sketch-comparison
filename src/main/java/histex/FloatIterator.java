@@ -1,8 +1,9 @@
 package histex;
 
-interface FloatIterator {
+interface FloatIterator extends AutoCloseable {
   static FloatIterator of(float[] values) {
     return new FloatIterator() {
+
       int i = 0;
 
       @Override
@@ -24,4 +25,8 @@ interface FloatIterator {
   float nextValue();
 
   boolean hasNext();
+
+  default void close() throws Exception {
+
+  }
 }

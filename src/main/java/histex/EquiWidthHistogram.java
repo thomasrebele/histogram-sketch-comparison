@@ -23,7 +23,7 @@ public class EquiWidthHistogram extends CountHistogram {
   @Override
   public int getBucketForValue(float v) {
     int bi = (int) ((v-start)/(end-start) * buckets);
-    return bi;
+    return Math.clamp(bi, 0, this.buckets-1);
   }
 
   @Override

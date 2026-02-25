@@ -46,4 +46,8 @@ public class KllHistogram implements Histogram {
     System.out.println(
         Arrays.toString(kll.getSortedView().getCumulativeWeights()));
   }
+
+  public String getInfo() {
+    return "[" + kll.getMinItem() + "," + kll.getMaxItem() + "]";
+  }
 }

@@ -15,26 +15,38 @@ public class Main {
     final long seed = new Random(System.nanoTime()).nextLong();
     out.println("seed: " + seed);
 
-    DiscreteCDF uniform = CDFFactory.gaussian(500, 100, 3000);
+    Supplier<FloatIterator> it =
+        FloatIteratorFactory.readFile("src/main/resources/tpcds-column-dumps/sf1/store_sales.ss_ext_list_price.zstd");
 
-    out.println("distribution: " + uniform.getDesc());
+    out.println("distribution: TODO" );
 
-    Supplier<DiscreteCDF.Datastream> ds = uniform.prepareStream(1000000, ()->new Random(seed));
+    Supplier<? extends FloatIterator> ds = it;
+
+    TDigestHistogram tdigest = new TDigestHistogram();
+    tdigest.consume(ds.get());
+
+    float min = (float)tdigest.getMin();
+    float max = (float)tdigest.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
-
-    histograms.add(new EquiWidthHistogram(100, 1000, 1200));
-    histograms.add(new EquiWidthHistogram(100, 1000, 600));
-    histograms.add(new EquiWidthHistogram(100, 1000, 200));
-    histograms.add(new EquiWidthHistogram(100, 1000, 10));
+    histograms.add(new EquiWidthHistogram(min, max, 1200));
+    histograms.add(new EquiWidthHistogram(min, max, 600));
+    histograms.add(new EquiWidthHistogram(min, max, 200));
+    histograms.add(new EquiWidthHistogram(min, max, 10));
     histograms.add(new KllHistogram());
-    histograms.add(new TDigestHistogram());
+
+    for (Histogram h : histograms) {
+      h.consume(ds.get());
+    }
+
+    histograms.add(tdigest);
 
     out.println("memory usage in bytes:");
     for (Histogram h : histograms) {
-      h.consume(ds.get());
       out.println(h.getDesc() + ", mem size: " + h.getMemoryUsageInBytes() + ", n=" + h.getN());
     }
+
+    out.println("range of values: " + tdigest.getInfo());
 
     GoldstandardRankEstimator goldstandard = new GoldstandardRankEstimator(ds);
 
@@ -42,14 +54,15 @@ public class Main {
     out.println("compare the multiplicative accuracy of range predicate selectivity");
     out.println();
     int idx = -1;
-    float rangeWidth = 0.00001f;
-    while (rangeWidth < 1000) {
+    float totalWidth = max-min;
+    float rangeWidth = (float) (totalWidth*1e-7);
+    while (rangeWidth < totalWidth) {
       idx += 1;
       out.println();
       out.println("--------------------------------------------------------------------------------");
       out.println("range width " + rangeWidth);
       final float rw = rangeWidth;
-      Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(100, 1000 - rw, 10000);
+      Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(min, max - rw, 10000);
 
       for (Histogram candidate : histograms) {
         Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(

@@ -36,4 +36,16 @@ public class TDigestHistogram implements Histogram {
   public int getMemoryUsageInBytes() {
     return tdigest.toByteArray().length;
   }
+
+  public String getInfo() {
+    return "[" + tdigest.getMinValue() + "," + tdigest.getMaxValue() + "]";
+  }
+
+  public double getMin() {
+    return tdigest.getMinValue();
+  }
+
+  public double getMax() {
+    return tdigest.getMaxValue();
+  }
 }

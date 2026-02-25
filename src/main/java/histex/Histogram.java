@@ -8,9 +8,9 @@ public interface Histogram extends RankEstimator {
   /** The number of elements  */
   long getN();
 
-  default void consume(DiscreteCDF.Datastream ds) {
-    while(ds.hasNext()) {
-      addValue(ds.nextValue());
+  default void consume(FloatIterator it) {
+    while(it.hasNext()) {
+      addValue(it.nextValue());
     }
   }
 

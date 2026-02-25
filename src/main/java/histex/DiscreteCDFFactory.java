@@ -3,7 +3,7 @@ package histex;
 import histex.DiscreteCDF.Point;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-public class CDFFactory {
+public class DiscreteCDFFactory {
 
   public static DiscreteCDF uniform(float start, float end) {
     Point[] ps = new Point[] {
