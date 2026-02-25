@@ -1,19 +1,19 @@
 package histex;
 
-import histex.CDF.Point;
+import histex.DiscreteCDF.Point;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class CDFFactory {
 
-  public static CDF uniform(float start, float end) {
+  public static DiscreteCDF uniform(float start, float end) {
     Point[] ps = new Point[] {
         new Point(start, 1f),
         new Point(end, 1f)
     };
-    return new CDF(ps);
+    return new DiscreteCDF("uniform", ps);
   }
 
-  public static CDF gaussian(float mean, float stddev, int buckets) {
+  public static DiscreteCDF gaussian(float mean, float stddev, int buckets) {
     NormalDistribution normal = new NormalDistribution(mean, stddev);
 
     float start = mean-3*stddev;
@@ -35,7 +35,9 @@ public class CDFFactory {
     ps[h.buckets-1] = new Point(end, 1.0f);
     ps[h.buckets] = new Point(end, 1.0f);
 
-    return new CDF(ps);
+    return new DiscreteCDF("gaussian "
+        + "mean="+mean + " "
+        + "stddev="+stddev, ps);
   }
 
 }

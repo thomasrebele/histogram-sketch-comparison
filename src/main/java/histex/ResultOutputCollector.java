@@ -20,7 +20,7 @@ public class ResultOutputCollector {
   public ResultOutputCollector() throws IOException {
     String path = "draft-results/";
     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
-    String hash = ShellUtils.exec("git", "rev-parse", "--short", "HEAD");
+    String hash = ShellUtils.exec("git", "rev-parse", "--short", "HEAD").trim();
     String gitStatus = ShellUtils.exec("git", "status", "--porcelain");
     boolean isCleanRepo = Arrays.asList("", "\n").contains(gitStatus);
 
@@ -51,7 +51,7 @@ public class ResultOutputCollector {
     File f = this.path.resolve("output.txt").toFile();
     output = new FileOutputStream(f);
 
-    println("Result based on commit " + hash + " " + (isCleanRepo ? " (clean)" : " (WITH MODIFICATIONS)"));
+    println("Result based on commit " + hash + (isCleanRepo ? " (clean)" : " (WITH MODIFICATIONS)"));
   }
 
   public void println(Object... objs) throws IOException {

@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
 
-public class CDF {
+public class DiscreteCDF {
+  private final String desc;
+
   /**
    * Creates a CDF from a string representation.
    * <p>
@@ -17,14 +19,14 @@ public class CDF {
    * Point (x2,y2) specifies that bucket [x2, x3) contains y2-y1 values.
    *
    * @param s a string representation
-   * @return a {@link CDF}
+   * @return a {@link DiscreteCDF}
    */
-  public static CDF parse(String s) {
+  public static DiscreteCDF parse(String desc, String s) {
     Point[] points = s.lines().map(line -> {
       String[] split = line.split(" ");
       return new Point(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
     }).toArray(Point[]::new);
-    return new CDF(points);
+    return new DiscreteCDF(desc, points);
   }
 
   /**
@@ -37,9 +39,9 @@ public class CDF {
    * </code>
    * Point (x1, y1) specifies that value x1 has rank y1.
    * @param s a string representation
-   * @return a {@link CDF}
+   * @return a {@link DiscreteCDF}
    */
-  public static CDF fromRanks(String s) {
+  public static DiscreteCDF fromRanks(String desc, String s) {
     Point[] rankPoints = s.lines().map(line -> {
       String[] split = line.split(" ");
       return new Point(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
@@ -52,7 +54,7 @@ public class CDF {
       float y = rankPoints[Math.min(i+1, points.length-1)].y;
       points[i] = new Point(x, y);
     }
-    return new CDF(points);
+    return new DiscreteCDF(desc, points);
   }
 
   static class Datastream implements FloatIterator {
@@ -98,7 +100,7 @@ public class CDF {
   // Point (x_i,y_i) specifies that P[x_i <= v < x_(i+1)] = y_i
   private final Point[] ps;
 
-  public CDF(Point... points) {
+  public DiscreteCDF(String description, Point... points) {
     ps = new Point[points.length];
     System.arraycopy(points, 0, ps, 0, points.length);
     Arrays.sort(ps);
@@ -115,6 +117,13 @@ public class CDF {
     }
 
     if (ps[ps.length-1].y != 1) throw new IllegalArgumentException("there must be a point with rank 1");
+
+    this.desc = description;
+  }
+
+  public String getDesc() {
+    return "discrete CDF " + desc
+        + " start=" + ps[0].x + " end="+ps[ps.length-1].x+" points="+ps.length;
   }
 
   public Supplier<Datastream> prepareStream(int n, Supplier<Random> rndSupplier) {

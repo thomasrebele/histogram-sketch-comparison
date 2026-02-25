@@ -5,8 +5,10 @@ public interface Histogram extends RankEstimator {
 
   int getMemoryUsageInBytes();
 
+  /** The number of elements  */
+  long getN();
 
-  default void consume(CDF.Datastream ds) {
+  default void consume(DiscreteCDF.Datastream ds) {
     while(ds.hasNext()) {
       addValue(ds.nextValue());
     }

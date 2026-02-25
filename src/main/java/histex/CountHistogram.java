@@ -13,6 +13,11 @@ public abstract class CountHistogram implements Histogram {
     count = new int[buckets];
   }
 
+  @Override
+  public long getN() {
+    return n;
+  }
+
   public List<Integer> getCounts() {
     return Arrays.stream(count).limit(count.length-1).boxed().toList();
   }

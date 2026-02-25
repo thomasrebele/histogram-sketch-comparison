@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CDFTest {
   @Test
   void testSample() {
-    CDF cdf = CDF.fromRanks("""
+    DiscreteCDF cdf = DiscreteCDF.fromRanks("cdf1", """
         100 0
         200 0.3
         300 0.5
@@ -22,7 +22,7 @@ class CDFTest {
         """);
 
     int n = 100;
-    CDF.Datastream ds = cdf.prepareStream(n, () -> new Random(123)).get();
+    DiscreteCDF.Datastream ds = cdf.prepareStream(n, () -> new Random(123)).get();
 
     float[] result = new float[n];
     for (int i=0; i<n; i++) {
@@ -49,7 +49,7 @@ class CDFTest {
 
   @Test
   void testConstruction() {
-    CDF cdf1 = CDF.parse("""
+    DiscreteCDF cdf1 = DiscreteCDF.parse("cdf1", """
         100 0.3
         200 0.5
         300 0.5
@@ -57,7 +57,7 @@ class CDFTest {
         1000 1.0
         """);
 
-    CDF cdf2 = CDF.fromRanks("""
+    DiscreteCDF cdf2 = DiscreteCDF.fromRanks("cdf2", """
         100 0
         200 0.3
         300 0.5
@@ -66,8 +66,8 @@ class CDFTest {
         """);
 
     int n = 100;
-    CDF.Datastream ds1 = cdf1.prepareStream(n, ()->new Random(123)).get();
-    CDF.Datastream ds2 = cdf2.prepareStream(n, ()->new Random(123)).get();
+    DiscreteCDF.Datastream ds1 = cdf1.prepareStream(n, ()->new Random(123)).get();
+    DiscreteCDF.Datastream ds2 = cdf2.prepareStream(n, ()->new Random(123)).get();
 
     for (int i=0; i<n; i++) {
       float f1 = ds1.nextValue();
@@ -80,7 +80,7 @@ class CDFTest {
 
   @Test
   void testDistribution() {
-    CDF cdf = CDF.fromRanks("""
+    DiscreteCDF cdf = DiscreteCDF.fromRanks("cdf1", """
         100 0
         200 0.3
         300 0.5
@@ -89,7 +89,7 @@ class CDFTest {
         """);
 
     int n = 100;
-    CDF.Datastream ds = cdf.prepareStream(n, ()->new Random(123)).get();
+    DiscreteCDF.Datastream ds = cdf.prepareStream(n, ()->new Random(123)).get();
     FixedBucketHistogram h = new FixedBucketHistogram(cdf.getBuckets());
 
     for (int i=0; i<n; i++) {

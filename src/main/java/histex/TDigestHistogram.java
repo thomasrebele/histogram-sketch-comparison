@@ -5,10 +5,15 @@ import org.apache.datasketches.tdigest.TDigestDouble;
 public class TDigestHistogram implements Histogram {
 
   private final TDigestDouble tdigest;
+  private int n = 0;
 
   public TDigestHistogram() {
     this.tdigest = new TDigestDouble((short)120);
+  }
 
+  @Override
+  public long getN() {
+    return n;
   }
 
   @Override
@@ -19,6 +24,7 @@ public class TDigestHistogram implements Histogram {
   @Override
   public void addValue(float v) {
     tdigest.update(v);
+    n+=1;
   }
 
   @Override

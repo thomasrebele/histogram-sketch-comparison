@@ -18,6 +18,11 @@ public class KllHistogram implements Histogram {
   }
 
   @Override
+  public long getN() {
+    return kll.getN();
+  }
+
+  @Override
   public void addValue(float f) {
     kll.update(f);
   }

@@ -12,11 +12,14 @@ public class Main {
   public static void main(String[] args) throws IOException {
 
     ResultOutputCollector out = new ResultOutputCollector();
+    final long seed = new Random(System.nanoTime()).nextLong();
+    out.println("seed: " + seed);
 
-    CDF uniform = CDFFactory.gaussian(500, 100, 3000);
-    Supplier<CDF.Datastream> ds = uniform.prepareStream(1000000, ()->new Random(123));
+    DiscreteCDF uniform = CDFFactory.gaussian(500, 100, 3000);
 
-    out.println("memory usage in bytes:");
+    out.println("distribution: " + uniform.getDesc());
+
+    Supplier<DiscreteCDF.Datastream> ds = uniform.prepareStream(1000000, ()->new Random(seed));
 
     List<Histogram> histograms = new ArrayList<>();
 
@@ -27,20 +30,21 @@ public class Main {
     histograms.add(new KllHistogram());
     histograms.add(new TDigestHistogram());
 
+    out.println("memory usage in bytes:");
     for (Histogram h : histograms) {
       h.consume(ds.get());
-      out.println(h.getDesc() + ", size: " + h.getMemoryUsageInBytes());
+      out.println(h.getDesc() + ", mem size: " + h.getMemoryUsageInBytes() + ", n=" + h.getN());
     }
 
     GoldstandardRankEstimator goldstandard = new GoldstandardRankEstimator(ds);
 
+    out.println("");
     out.println("compare the multiplicative accuracy of range predicate selectivity");
     out.println();
     int idx = -1;
     float rangeWidth = 0.00001f;
     while (rangeWidth < 1000) {
       idx += 1;
-      out.println();
       out.println();
       out.println("--------------------------------------------------------------------------------");
       out.println("range width " + rangeWidth);
