@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+// TODO tr should close the resources
 public class ResultOutputCollector {
 
   private final Path path;
@@ -17,7 +18,7 @@ public class ResultOutputCollector {
 
   public ResultOutputCollector() throws IOException {
     LocalDateTime now = LocalDateTime.now();
-    String path = "results/";
+    String path = "draft-results/";
     String prefix = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
         + "-" + ShellUtils.exec("git", "rev-parse", "--short", "HEAD") + "-";
 
@@ -49,5 +50,13 @@ public class ResultOutputCollector {
     output.write('\n');
     System.out.println();
     output.flush();
+  }
+
+  public void fileAppend(String file, String string) throws IOException {
+    File f = path.resolve("./" + file).toFile();
+    f.toPath().getParent().toFile().mkdirs();
+    try(FileOutputStream fs = new FileOutputStream(f, true)) {
+      fs.write(string.getBytes(StandardCharsets.UTF_8));
+    }
   }
 }

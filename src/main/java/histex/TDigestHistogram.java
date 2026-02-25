@@ -12,6 +12,11 @@ public class TDigestHistogram implements Histogram {
   }
 
   @Override
+  public String getDesc() {
+    return "tdigest(k=" + tdigest.getK() + ")";
+  }
+
+  @Override
   public void addValue(float v) {
     tdigest.update(v);
   }

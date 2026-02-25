@@ -16,6 +16,11 @@ public class EquiWidthHistogram extends CountHistogram {
   }
 
   @Override
+  public String getDesc() {
+    return "equi-width(k=" + buckets +")";
+  }
+
+  @Override
   public int getBucketForValue(float v) {
     int bi = (int) ((v-start)/(end-start) * buckets);
     return bi;

@@ -1,5 +1,7 @@
 package histex;
 
+import org.apache.datasketches.sampling.ReservoirItemsSketch;
+
 public class Measure {
 
   public static double evaluateMultiplicativeDifference(RankEstimator h1, RankEstimator h2, float[] values) {
@@ -22,7 +24,7 @@ public class Measure {
     return diff / values.length;
   }
 
-  public record Result(double scaleDiff, int ranges, int zeroH1, int zeroH2, int zeroBoth) {
+  public record Result(double scaleDiff, int ranges, int zeroH1, int zeroH2, int zeroBoth, RatioResult[] samples) {
     @Override
     public String toString() {
       return "Result{"
@@ -34,7 +36,13 @@ public class Measure {
     }
   }
 
+  public record RatioResult(double r1, double r2, double r1s, double r1e, double r2s, double r2e) {
+
+  }
+
   public static Result evaluateMultiplicativeSelectivityDifference(RankEstimator h1, RankEstimator h2, FloatIterator values, float rangeWidth) {
+    ReservoirItemsSketch<RatioResult> sample = ReservoirItemsSketch.newInstance(20);
+
     double diff = 0;
 
     int zeroH1 = 0;
@@ -53,19 +61,21 @@ public class Measure {
       double r2e = h2.getNormalizedRank(v + rangeWidth);
       double r2s = h2.getNormalizedRank(v);
       double r2 = r2e - r2s;
+      sample.update(new RatioResult(r1, r2, r1s, r1e, r2s, r2e));
+
       r1 = Math.max(r1, h1.getMinNormalizedRankDifference());
       r2 = Math.max(r2, h2.getMinNormalizedRankDifference());
       //System.out.println("ratio: " + (r1/r2) + "      r1 " + r1 + "  r2 " + r2 + "   r1es " + r1e + " " + r1s + "  r2es " + r2e + " " + r2s);
       if (r1 == 0 && r2 == 0) {
         zeroBoth += 1;
-        continue;
       }
-      else if (r1 == 0) {
+      if (r1 == 0) {
         zeroH1 += 1;
-        continue;
       }
-      else if (r2 == 0) {
+      if (r2 == 0) {
         zeroH2 += 1;
+      }
+      if (r1 == 0 || r2 == 0) {
         continue;
       }
 
@@ -79,7 +89,8 @@ public class Measure {
       valid++;
     }
     diff /= Math.log(10);
-    return new Result(diff / valid, count, zeroH1, zeroH2, zeroBoth);
+
+    return new Result(diff / valid, count, zeroH1, zeroH2, zeroBoth, sample.getSamples());
   }
 
 }

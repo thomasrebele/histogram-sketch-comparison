@@ -13,6 +13,11 @@ public class KllHistogram implements Histogram {
   }
 
   @Override
+  public String getDesc() {
+    return "kll(k=" + kll.getK() + ")";
+  }
+
+  @Override
   public void addValue(float f) {
     kll.update(f);
   }

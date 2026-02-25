@@ -1,8 +1,12 @@
 package histex;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Main {
   public static void main(String[] args) throws IOException {
@@ -14,60 +18,44 @@ public class Main {
 
     out.println("memory usage in bytes:");
 
-    EquiWidthHistogram h1 = new EquiWidthHistogram(100, 1000, 600);
-    h1.consume(ds.get());
-    out.println("equi-width histogram with " + h1.buckets + " buckets, size: " + h1.getMemoryUsageInBytes());
+    List<Histogram> histograms = new ArrayList<>();
 
-    EquiWidthHistogram h2 = new EquiWidthHistogram(100, 1000, 200);
-    h2.consume(ds.get());
-    out.println("equi-width histogram with " + h2.buckets + " buckets, size: " + h2.getMemoryUsageInBytes());
+    histograms.add(new EquiWidthHistogram(100, 1000, 1200));
+    histograms.add(new EquiWidthHistogram(100, 1000, 600));
+    histograms.add(new EquiWidthHistogram(100, 1000, 200));
+    histograms.add(new EquiWidthHistogram(100, 1000, 10));
+    histograms.add(new KllHistogram());
+    histograms.add(new TDigestHistogram());
 
-    EquiWidthHistogram h3 = new EquiWidthHistogram(100, 1000, 10);
-    h3.consume(ds.get());
-    out.println("equi-width histogram with " + h3.buckets + " buckets, size: " + h3.getMemoryUsageInBytes());
+    for (Histogram h : histograms) {
+      h.consume(ds.get());
+      out.println(h.getDesc() + ", size: " + h.getMemoryUsageInBytes());
+    }
 
-    KllHistogram kll = new KllHistogram();
-    kll.consume(ds.get());
-    out.println("KLL sketch size: " + kll.getMemoryUsageInBytes());
-
-    TDigestHistogram tdigest = new TDigestHistogram();
-    tdigest.consume(ds.get());
-    out.println("t-digest sketch size: " + tdigest.getMemoryUsageInBytes());
-
-    //out.println(Arrays.toString(h1.getRanks(h1.getBucketEnds())));
-    //out.println(Arrays.toString(kll.getRanks(h1.getBucketEnds())));
-    //out.println(Arrays.toString(tdigest.getRanks(h1.getBucketEnds())));
-
-    GoldstandardRankEstimator e = new GoldstandardRankEstimator(ds);
+    GoldstandardRankEstimator goldstandard = new GoldstandardRankEstimator(ds);
 
     out.println("compare the multiplicative accuracy of range predicate selectivity");
     out.println();
+    int idx = -1;
     float rangeWidth = 0.00001f;
     while (rangeWidth < 1000) {
+      idx += 1;
       out.println();
       out.println();
       out.println("--------------------------------------------------------------------------------");
       out.println("range width " + rangeWidth);
       final float rw = rangeWidth;
       Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(100, 1000 - rw, 10000);
-      out.println("equi-width histogram with " + h1.buckets);
-      out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h1, sequence.get(), rangeWidth)));
 
-      out.println();
-      out.println("equi-width histogram with " + h2.buckets);
-      out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h2, sequence.get(), rangeWidth)));
+      for (Histogram candidate : histograms) {
+        Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
+            goldstandard, candidate, sequence.get(), rangeWidth);
+        String desc = String.format("%20s", candidate.getDesc());
+        out.println(desc + ": " + result);
 
-      out.println();
-      out.println("equi-width histogram with " + h3.buckets);
-      out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, h3, sequence.get(), rangeWidth)));
-
-      out.println();
-      out.println("KLL sketch");
-      out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, kll, sequence.get(), rangeWidth)));
-
-      out.println();
-      out.println("t-digest sketch");
-      out.println((Measure.evaluateMultiplicativeSelectivityDifference(e, tdigest, sequence.get(), rangeWidth)));
+        String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));
+        out.fileAppend("/" + idx + "-range-" + rangeWidth + "/" + candidate.getDesc(), samples);
+      }
 
       rangeWidth *= 2;
     }

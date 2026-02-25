@@ -19,6 +19,11 @@ public class GoldstandardRankEstimator implements RankEstimator {
   }
 
   @Override
+  public String getDesc() {
+    return "goldstandard";
+  }
+
+  @Override
   public double getNormalizedRank(float value) {
     // TODO tr how to handle duplicate values?
 

@@ -12,6 +12,12 @@ public class FixedBucketHistogram extends CountHistogram {
   }
 
   @Override
+  public String getDesc() {
+    return "fixed-buckets(k=" + buckets.length +")";
+  }
+
+
+  @Override
   public int getBucketForValue(float v) {
     int bi = Arrays.binarySearch(buckets, v);
     if (bi < 0) {
