@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Objects;
 
 // TODO tr should close the resources
@@ -17,14 +18,22 @@ public class ResultOutputCollector {
   private final OutputStream output;
 
   public ResultOutputCollector() throws IOException {
-    LocalDateTime now = LocalDateTime.now();
     String path = "draft-results/";
-    String prefix = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
-        + "-" + ShellUtils.exec("git", "rev-parse", "--short", "HEAD") + "-";
+    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+    String hash = ShellUtils.exec("git", "rev-parse", "--short", "HEAD");
+    String gitStatus = ShellUtils.exec("git", "status", "--porcelain");
+    boolean isCleanRepo = Arrays.asList("", "\n").contains(gitStatus);
+
+    String prefix = time + "-" + hash + "-";
+    if(!isCleanRepo) {
+      System.out.println("Warning: there are modifications in the repository:\n" + gitStatus);
+      prefix += "mod-";
+    }
 
     int max = -1;
     File resultDir = Path.of(path).toFile();
-    File[] files = resultDir.listFiles((dir, name) -> name.startsWith(prefix));
+    String fprefix = prefix;
+    File[] files = resultDir.listFiles((dir, name) -> name.startsWith(fprefix));
     for (File f : Objects.requireNonNull(files)) {
       String substring = f.getName().substring(prefix.length());
       int i = Integer.parseInt(substring);
@@ -37,9 +46,12 @@ public class ResultOutputCollector {
     this.path.toFile().mkdirs();
 
     System.out.println("Storing the results of the experiment in: " + this.path.toAbsolutePath());
+    System.out.println();
 
     File f = this.path.resolve("output.txt").toFile();
     output = new FileOutputStream(f);
+
+    println("Result based on commit " + hash + " " + (isCleanRepo ? " (clean)" : " (WITH MODIFICATIONS)"));
   }
 
   public void println(Object... objs) throws IOException {
