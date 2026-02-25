@@ -1,0 +1,256 @@
+Result based on commit a48c779 (clean)
+seed: -3851860719674027695
+distribution: discrete CDF gaussian mean=500.0 stddev=100.0 start=200.0 end=800.0 points=3001
+memory usage in bytes:
+equi-width(k=1200), mem size: 4812, n=1000000
+equi-width(k=600), mem size: 2412, n=1000000
+equi-width(k=200), mem size: 812, n=1000000
+equi-width(k=10), mem size: 52, n=1000000
+kll(k=200), mem size: 2536, n=1000000
+tdigest(k=120), mem size: 2656, n=1000000
+
+compare the multiplicative accuracy of range predicate selectivity
+
+
+--------------------------------------------------------------------------------
+range width 1.0E-5
+  equi-width(k=1200): Result{scaleDiff=1.5526, ranges=10000, zeroH1=9999, zeroH2=9375, zeroBoth=9375}
+   equi-width(k=600): Result{scaleDiff=1.8565, ranges=10000, zeroH1=9999, zeroH2=9366, zeroBoth=9366}
+   equi-width(k=200): Result{scaleDiff=2.2876, ranges=10000, zeroH1=9999, zeroH2=9366, zeroBoth=9366}
+    equi-width(k=10): Result{scaleDiff=2.6124, ranges=10000, zeroH1=9999, zeroH2=9266, zeroBoth=9266}
+          kll(k=200): Result{scaleDiff=4.1237, ranges=10000, zeroH1=9999, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=1.1282, ranges=10000, zeroH1=9999, zeroH2=9378, zeroBoth=9378}
+
+--------------------------------------------------------------------------------
+range width 2.0E-5
+  equi-width(k=1200): Result{scaleDiff=1.1160, ranges=10000, zeroH1=9808, zeroH2=6531, zeroBoth=6531}
+   equi-width(k=600): Result{scaleDiff=1.1175, ranges=10000, zeroH1=9808, zeroH2=6522, zeroBoth=6522}
+   equi-width(k=200): Result{scaleDiff=1.1195, ranges=10000, zeroH1=9808, zeroH2=6522, zeroBoth=6522}
+    equi-width(k=10): Result{scaleDiff=1.1447, ranges=10000, zeroH1=9808, zeroH2=6422, zeroBoth=6422}
+          kll(k=200): Result{scaleDiff=4.1118, ranges=10000, zeroH1=9808, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=1.1143, ranges=10000, zeroH1=9808, zeroH2=6534, zeroBoth=6534}
+
+--------------------------------------------------------------------------------
+range width 4.0E-5
+  equi-width(k=1200): Result{scaleDiff=0.9822, ranges=10000, zeroH1=9526, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.9830, ranges=10000, zeroH1=9526, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.9836, ranges=10000, zeroH1=9526, zeroH2=3300, zeroBoth=3300}
+    equi-width(k=10): Result{scaleDiff=1.0015, ranges=10000, zeroH1=9526, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=4.1125, ranges=10000, zeroH1=9526, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.9822, ranges=10000, zeroH1=9526, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 8.0E-5
+  equi-width(k=1200): Result{scaleDiff=0.7430, ranges=10000, zeroH1=9215, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.7439, ranges=10000, zeroH1=9215, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.7449, ranges=10000, zeroH1=9215, zeroH2=3300, zeroBoth=3300}
+    equi-width(k=10): Result{scaleDiff=0.7601, ranges=10000, zeroH1=9215, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=4.0923, ranges=10000, zeroH1=9215, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.7423, ranges=10000, zeroH1=9215, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 1.6E-4
+  equi-width(k=1200): Result{scaleDiff=0.4771, ranges=10000, zeroH1=8446, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.4777, ranges=10000, zeroH1=8446, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.4782, ranges=10000, zeroH1=8446, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.4879, ranges=10000, zeroH1=8446, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=4.0606, ranges=10000, zeroH1=8446, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.4772, ranges=10000, zeroH1=8446, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 3.2E-4
+  equi-width(k=1200): Result{scaleDiff=0.3207, ranges=10000, zeroH1=7625, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.3211, ranges=10000, zeroH1=7625, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.3214, ranges=10000, zeroH1=7625, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.3288, ranges=10000, zeroH1=7625, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.9973, ranges=10000, zeroH1=7625, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.3212, ranges=10000, zeroH1=7625, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 6.4E-4
+  equi-width(k=1200): Result{scaleDiff=0.2711, ranges=10000, zeroH1=6570, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.2713, ranges=10000, zeroH1=6570, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.2715, ranges=10000, zeroH1=6570, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.2857, ranges=10000, zeroH1=6570, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.8781, ranges=10000, zeroH1=6570, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.2711, ranges=10000, zeroH1=6570, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 0.00128
+  equi-width(k=1200): Result{scaleDiff=0.2242, ranges=10000, zeroH1=5618, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.2243, ranges=10000, zeroH1=5618, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.2243, ranges=10000, zeroH1=5618, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.2244, ranges=10000, zeroH1=5618, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.7103, ranges=10000, zeroH1=5618, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.2241, ranges=10000, zeroH1=5618, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 0.00256
+  equi-width(k=1200): Result{scaleDiff=0.1848, ranges=10000, zeroH1=4848, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.1848, ranges=10000, zeroH1=4848, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.1840, ranges=10000, zeroH1=4848, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.2092, ranges=10000, zeroH1=4848, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.5144, ranges=10000, zeroH1=4848, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.1845, ranges=10000, zeroH1=4848, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 0.00512
+  equi-width(k=1200): Result{scaleDiff=0.1471, ranges=10000, zeroH1=4280, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.1472, ranges=10000, zeroH1=4280, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.1467, ranges=10000, zeroH1=4280, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.1789, ranges=10000, zeroH1=4280, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.3047, ranges=10000, zeroH1=4280, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.1472, ranges=10000, zeroH1=4280, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 0.01024
+  equi-width(k=1200): Result{scaleDiff=0.1147, ranges=10000, zeroH1=3832, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.1147, ranges=10000, zeroH1=3832, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.1149, ranges=10000, zeroH1=3832, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.1586, ranges=10000, zeroH1=3832, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=3.0815, ranges=10000, zeroH1=3832, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.1144, ranges=10000, zeroH1=3832, zeroH2=3334, zeroBoth=3334}
+
+--------------------------------------------------------------------------------
+range width 0.02048
+  equi-width(k=1200): Result{scaleDiff=0.0877, ranges=10000, zeroH1=3518, zeroH2=3325, zeroBoth=3325}
+   equi-width(k=600): Result{scaleDiff=0.0880, ranges=10000, zeroH1=3518, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.0904, ranges=10000, zeroH1=3518, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.1537, ranges=10000, zeroH1=3518, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=2.8385, ranges=10000, zeroH1=3518, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0883, ranges=10000, zeroH1=3518, zeroH2=3333, zeroBoth=3333}
+
+--------------------------------------------------------------------------------
+range width 0.04096
+  equi-width(k=1200): Result{scaleDiff=0.0675, ranges=10000, zeroH1=3368, zeroH2=3324, zeroBoth=3324}
+   equi-width(k=600): Result{scaleDiff=0.0686, ranges=10000, zeroH1=3368, zeroH2=3316, zeroBoth=3316}
+   equi-width(k=200): Result{scaleDiff=0.0728, ranges=10000, zeroH1=3368, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.1514, ranges=10000, zeroH1=3368, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=2.5653, ranges=10000, zeroH1=3368, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0686, ranges=10000, zeroH1=3368, zeroH2=3332, zeroBoth=3332}
+
+--------------------------------------------------------------------------------
+range width 0.08192
+  equi-width(k=1200): Result{scaleDiff=0.0451, ranges=10000, zeroH1=3335, zeroH2=3323, zeroBoth=3323}
+   equi-width(k=600): Result{scaleDiff=0.0466, ranges=10000, zeroH1=3335, zeroH2=3315, zeroBoth=3315}
+   equi-width(k=200): Result{scaleDiff=0.0518, ranges=10000, zeroH1=3335, zeroH2=3299, zeroBoth=3299}
+    equi-width(k=10): Result{scaleDiff=0.1445, ranges=10000, zeroH1=3335, zeroH2=2999, zeroBoth=2999}
+          kll(k=200): Result{scaleDiff=2.2651, ranges=10000, zeroH1=3335, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0466, ranges=10000, zeroH1=3335, zeroH2=3332, zeroBoth=3332}
+
+--------------------------------------------------------------------------------
+range width 0.16384
+  equi-width(k=1200): Result{scaleDiff=0.0255, ranges=10000, zeroH1=3330, zeroH2=3322, zeroBoth=3322}
+   equi-width(k=600): Result{scaleDiff=0.0271, ranges=10000, zeroH1=3330, zeroH2=3314, zeroBoth=3314}
+   equi-width(k=200): Result{scaleDiff=0.0332, ranges=10000, zeroH1=3330, zeroH2=3297, zeroBoth=3297}
+    equi-width(k=10): Result{scaleDiff=0.1392, ranges=10000, zeroH1=3330, zeroH2=2997, zeroBoth=2997}
+          kll(k=200): Result{scaleDiff=1.9603, ranges=10000, zeroH1=3330, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0277, ranges=10000, zeroH1=3330, zeroH2=3330, zeroBoth=3330}
+
+--------------------------------------------------------------------------------
+range width 0.32768
+  equi-width(k=1200): Result{scaleDiff=0.0137, ranges=10000, zeroH1=3327, zeroH2=3319, zeroBoth=3319}
+   equi-width(k=600): Result{scaleDiff=0.0153, ranges=10000, zeroH1=3327, zeroH2=3310, zeroBoth=3310}
+   equi-width(k=200): Result{scaleDiff=0.0227, ranges=10000, zeroH1=3327, zeroH2=3294, zeroBoth=3294}
+    equi-width(k=10): Result{scaleDiff=0.1372, ranges=10000, zeroH1=3327, zeroH2=2994, zeroBoth=2994}
+          kll(k=200): Result{scaleDiff=1.6574, ranges=10000, zeroH1=3327, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0172, ranges=10000, zeroH1=3327, zeroH2=3327, zeroBoth=3327}
+
+--------------------------------------------------------------------------------
+range width 0.65536
+  equi-width(k=1200): Result{scaleDiff=0.0078, ranges=10000, zeroH1=3321, zeroH2=3312, zeroBoth=3312}
+   equi-width(k=600): Result{scaleDiff=0.0093, ranges=10000, zeroH1=3321, zeroH2=3304, zeroBoth=3304}
+   equi-width(k=200): Result{scaleDiff=0.0178, ranges=10000, zeroH1=3321, zeroH2=3288, zeroBoth=3288}
+    equi-width(k=10): Result{scaleDiff=0.1367, ranges=10000, zeroH1=3321, zeroH2=2988, zeroBoth=2988}
+          kll(k=200): Result{scaleDiff=1.3554, ranges=10000, zeroH1=3321, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0125, ranges=10000, zeroH1=3321, zeroH2=3321, zeroBoth=3321}
+
+--------------------------------------------------------------------------------
+range width 1.31072
+  equi-width(k=1200): Result{scaleDiff=0.0045, ranges=10000, zeroH1=3309, zeroH2=3301, zeroBoth=3301}
+   equi-width(k=600): Result{scaleDiff=0.0058, ranges=10000, zeroH1=3309, zeroH2=3293, zeroBoth=3293}
+   equi-width(k=200): Result{scaleDiff=0.0151, ranges=10000, zeroH1=3309, zeroH2=3276, zeroBoth=3276}
+    equi-width(k=10): Result{scaleDiff=0.1365, ranges=10000, zeroH1=3309, zeroH2=2975, zeroBoth=2975}
+          kll(k=200): Result{scaleDiff=1.0533, ranges=10000, zeroH1=3309, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0098, ranges=10000, zeroH1=3309, zeroH2=3309, zeroBoth=3309}
+
+--------------------------------------------------------------------------------
+range width 2.62144
+  equi-width(k=1200): Result{scaleDiff=0.0025, ranges=10000, zeroH1=3285, zeroH2=3276, zeroBoth=3276}
+   equi-width(k=600): Result{scaleDiff=0.0037, ranges=10000, zeroH1=3285, zeroH2=3268, zeroBoth=3268}
+   equi-width(k=200): Result{scaleDiff=0.0113, ranges=10000, zeroH1=3285, zeroH2=3252, zeroBoth=3252}
+    equi-width(k=10): Result{scaleDiff=0.1349, ranges=10000, zeroH1=3285, zeroH2=2950, zeroBoth=2950}
+          kll(k=200): Result{scaleDiff=0.7523, ranges=10000, zeroH1=3285, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0072, ranges=10000, zeroH1=3285, zeroH2=3285, zeroBoth=3285}
+
+--------------------------------------------------------------------------------
+range width 5.24288
+  equi-width(k=1200): Result{scaleDiff=0.0014, ranges=10000, zeroH1=3236, zeroH2=3228, zeroBoth=3228}
+   equi-width(k=600): Result{scaleDiff=0.0024, ranges=10000, zeroH1=3236, zeroH2=3219, zeroBoth=3219}
+   equi-width(k=200): Result{scaleDiff=0.0071, ranges=10000, zeroH1=3236, zeroH2=3202, zeroBoth=3202}
+    equi-width(k=10): Result{scaleDiff=0.1298, ranges=10000, zeroH1=3236, zeroH2=2901, zeroBoth=2901}
+          kll(k=200): Result{scaleDiff=0.5085, ranges=10000, zeroH1=3236, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0042, ranges=10000, zeroH1=3236, zeroH2=3236, zeroBoth=3236}
+
+--------------------------------------------------------------------------------
+range width 10.48576
+  equi-width(k=1200): Result{scaleDiff=0.0008, ranges=10000, zeroH1=3137, zeroH2=3128, zeroBoth=3128}
+   equi-width(k=600): Result{scaleDiff=0.0015, ranges=10000, zeroH1=3137, zeroH2=3120, zeroBoth=3120}
+   equi-width(k=200): Result{scaleDiff=0.0051, ranges=10000, zeroH1=3137, zeroH2=3104, zeroBoth=3104}
+    equi-width(k=10): Result{scaleDiff=0.1167, ranges=10000, zeroH1=3137, zeroH2=2799, zeroBoth=2799}
+          kll(k=200): Result{scaleDiff=0.3393, ranges=10000, zeroH1=3137, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0029, ranges=10000, zeroH1=3137, zeroH2=3137, zeroBoth=3137}
+
+--------------------------------------------------------------------------------
+range width 20.97152
+  equi-width(k=1200): Result{scaleDiff=0.0005, ranges=10000, zeroH1=2936, zeroH2=2927, zeroBoth=2927}
+   equi-width(k=600): Result{scaleDiff=0.0010, ranges=10000, zeroH1=2936, zeroH2=2918, zeroBoth=2918}
+   equi-width(k=200): Result{scaleDiff=0.0035, ranges=10000, zeroH1=2936, zeroH2=2901, zeroBoth=2901}
+    equi-width(k=10): Result{scaleDiff=0.1049, ranges=10000, zeroH1=2936, zeroH2=2595, zeroBoth=2595}
+          kll(k=200): Result{scaleDiff=0.2202, ranges=10000, zeroH1=2936, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0017, ranges=10000, zeroH1=2936, zeroH2=2936, zeroBoth=2936}
+
+--------------------------------------------------------------------------------
+range width 41.94304
+  equi-width(k=1200): Result{scaleDiff=0.0003, ranges=10000, zeroH1=2519, zeroH2=2510, zeroBoth=2510}
+   equi-width(k=600): Result{scaleDiff=0.0007, ranges=10000, zeroH1=2519, zeroH2=2501, zeroBoth=2501}
+   equi-width(k=200): Result{scaleDiff=0.0025, ranges=10000, zeroH1=2519, zeroH2=2483, zeroBoth=2483}
+    equi-width(k=10): Result{scaleDiff=0.0928, ranges=10000, zeroH1=2519, zeroH2=2169, zeroBoth=2169}
+          kll(k=200): Result{scaleDiff=0.1537, ranges=10000, zeroH1=2519, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0010, ranges=10000, zeroH1=2519, zeroH2=2519, zeroBoth=2519}
+
+--------------------------------------------------------------------------------
+range width 83.88608
+  equi-width(k=1200): Result{scaleDiff=0.0002, ranges=10000, zeroH1=1620, zeroH2=1611, zeroBoth=1611}
+   equi-width(k=600): Result{scaleDiff=0.0005, ranges=10000, zeroH1=1620, zeroH2=1602, zeroBoth=1602}
+   equi-width(k=200): Result{scaleDiff=0.0019, ranges=10000, zeroH1=1620, zeroH2=1584, zeroBoth=1584}
+    equi-width(k=10): Result{scaleDiff=0.0759, ranges=10000, zeroH1=1620, zeroH2=1252, zeroBoth=1252}
+          kll(k=200): Result{scaleDiff=0.1188, ranges=10000, zeroH1=1620, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0006, ranges=10000, zeroH1=1620, zeroH2=1620, zeroBoth=1620}
+
+--------------------------------------------------------------------------------
+range width 167.77216
+  equi-width(k=1200): Result{scaleDiff=0.0001, ranges=10000, zeroH1=441, zeroH2=434, zeroBoth=434}
+   equi-width(k=600): Result{scaleDiff=0.0003, ranges=10000, zeroH1=441, zeroH2=434, zeroBoth=434}
+   equi-width(k=200): Result{scaleDiff=0.0007, ranges=10000, zeroH1=441, zeroH2=413, zeroBoth=413}
+    equi-width(k=10): Result{scaleDiff=0.0609, ranges=10000, zeroH1=441, zeroH2=167, zeroBoth=167}
+          kll(k=200): Result{scaleDiff=0.0617, ranges=10000, zeroH1=441, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0004, ranges=10000, zeroH1=441, zeroH2=441, zeroBoth=441}
+
+--------------------------------------------------------------------------------
+range width 335.5443
+  equi-width(k=1200): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+   equi-width(k=600): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+   equi-width(k=200): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+    equi-width(k=10): Result{scaleDiff=0.0141, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+          kll(k=200): Result{scaleDiff=0.0023, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0002, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+
+--------------------------------------------------------------------------------
+range width 671.0886
+  equi-width(k=1200): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+   equi-width(k=600): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+   equi-width(k=200): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+    equi-width(k=10): Result{scaleDiff=0.0014, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+          kll(k=200): Result{scaleDiff=0.0004, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
+      tdigest(k=120): Result{scaleDiff=0.0000, ranges=10000, zeroH1=0, zeroH2=0, zeroBoth=0}
