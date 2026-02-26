@@ -19,8 +19,8 @@
     </main>
     <script>
       const container = document.getElementById("chart");
-      const width = 800; // container.clientWidth;
-      const height = 1200; // container.clientHeight;
+      const width = 1000; // container.clientWidth;
+      const height = 800; // container.clientHeight;
 
       const svg = d3.select(container).append("svg")
         .attr("width", width)
@@ -46,11 +46,11 @@
           ymax = d3.max(csv_data, f=> d3.max(f, d=>d.y))
           console.log(xmin, xmax);
 
-          const xScale = d3.scaleLinear().domain([xmin, xmax]).nice().range([0, 400]);
-          const yScale = d3.scaleLinear().domain([ymin, ymax]).nice().range([400, 0]);
+          const xScale = d3.scaleLinear().domain([xmin, xmax]).nice().range([0, width]);
+          const yScale = d3.scaleLinear().domain([ymin, ymax]).nice().range([height, 0]);
           const xAxis = d3.axisBottom(xScale);
           const yAxis = d3.axisLeft(yScale);
-          const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 400)").call(xAxis);
+          const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 680)").call(xAxis);
           const gyAxis = svg.append("g").attr("class", "y-axis").call(yAxis);
 
           // legend
