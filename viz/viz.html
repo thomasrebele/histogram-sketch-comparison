@@ -57,7 +57,7 @@
 
           // plotting
           var myColor = () => d3.scaleOrdinal().domain(data)
-            .range(["gold", "blue", "green", "yellow", "black", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
+            .range(["blue", "green", "yellow", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
           // axis
           xmin = d3.min(csv_data, f=> d3.min(f, d=>d.x))
           xmax = d3.max(csv_data, f=> d3.max(f, d=>d.x))
@@ -93,9 +93,9 @@
             .attr("fill", lineColor)
           ;
           const lines = series.append("path").attr("class", "line")
-            .attr("stroke-width", 3.5).style("fill", "none")
+            .attr("stroke-width", 2.5).style("fill", "none")
             .attr("d", d3.line().x(d => xScale(d.x)) .y(d => yScale(d.y)));
-          const points = series.selectAll(".point").data(d=>d).join("circle").attr("class", "point").attr("r", 5)
+          const points = series.selectAll(".point").data(d=>d).join("circle").attr("class", "point").attr("r", 2)
             .attr("cx", d=>xScale(d.x)).attr("cy", d=>yScale(d.y));
 
           // zooming
