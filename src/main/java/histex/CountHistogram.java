@@ -89,8 +89,10 @@ public abstract class CountHistogram implements Histogram {
   public String debugAsCsv() {
     StringBuilder sb = new StringBuilder();
     sb.append("x,y\n");
+    float v = getBucketStart(0);
+    sb.append(v).append(",").append(0).append("\n");
     for(int i=0; i<count.length; i++) {
-      float v = getBucketStart(i);
+      v = getBucketEnd(i);
       sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
     }
     return sb.toString();

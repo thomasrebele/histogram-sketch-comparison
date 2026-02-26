@@ -87,7 +87,7 @@ public class Main {
         if(csv != null) {
           File f = out.fileAppend(rangeDir + "/histogram-" + candidate.getDesc() + ".csv",
               candidate.debugAsCsv());
-          toc.append(f.getName()).append("\t").append("TODO").append("\n");
+          toc.append(f.getName()).append("\t").append(candidate.getDesc()).append("\n");
         }
       }
       out.fileAppend(rangeDir + "/toc.csv", toc.toString());

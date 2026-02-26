@@ -37,7 +37,7 @@
         .append("g")
         .attr("transform", "translate(50,50)");
 
-      const legendContainer = svg.append("g").attr("transform", "translate(450,200)");
+      const legendContainer = svg.append("g").attr("transform", "translate(200,0)");
 
       // load data
       var basePath = "/";
@@ -76,7 +76,7 @@
 
           // legend
           var legend = legendContainer.selectAll(".legend")
-            .data([{desc: "test1", color:"#00ff00"}, {desc:"test2", color:"#ff0000"}])
+            .data(toc)
             .enter().append("g")
               .attr("class", "legend")
               .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
