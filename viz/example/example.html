@@ -28,59 +28,79 @@
         .append("g")
         .attr("transform", "translate(50,50)");
 
+      const legendContainer = svg.append("g").attr("transform", "translate(450,200)");
+
       d3.csv("toc.csv").then(function(toc) {
         console.log(toc);
         const data = toc.map(el => d3.csv(el.file));
         Promise.all(data).then(csv_data => {
           console.log("CSVs loaded");
 
+
+          var myColor = () => d3.scaleOrdinal().domain(data)
+            .range(["gold", "blue", "green", "yellow", "black", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
           // axis
           xmin = d3.min(csv_data, f=> d3.min(f, d=>d.x))
-          xmax = d3.min(csv_data, f=> d3.max(f, d=>d.x))
+          xmax = d3.max(csv_data, f=> d3.max(f, d=>d.x))
           ymin = d3.min(csv_data, f=> d3.min(f, d=>d.y))
-          ymax = d3.min(csv_data, f=> d3.max(f, d=>d.y))
+          ymax = d3.max(csv_data, f=> d3.max(f, d=>d.y))
+          console.log(xmin, xmax);
 
           const xScale = d3.scaleLinear().domain([xmin, xmax]).nice().range([0, 400]);
           const yScale = d3.scaleLinear().domain([ymin, ymax]).nice().range([400, 0]);
           const xAxis = d3.axisBottom(xScale);
           const yAxis = d3.axisLeft(yScale);
-          svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 400)").call(xAxis);
-          svg.append("g").attr("class", "y-axis").call(yAxis);
+          const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 400)").call(xAxis);
+          const gyAxis = svg.append("g").attr("class", "y-axis").call(yAxis);
 
           // legend
-          var legend = svg.selectAll(".legend")
+          var legend = legendContainer.selectAll(".legend")
             .data([{desc: "test1", color:"#00ff00"}, {desc:"test2", color:"#ff0000"}])
             .enter().append("g")
               .attr("class", "legend")
               .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-          legend.append("rect")
-            .attr("x", 0)
-            .attr("width", 18)
-            .attr("height", 18)
-            .style("fill", d=>d.color);
-
-          legend.append("text")
-            .attr("x", 0)
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .style("text-anchor", "end")
+          legend.append("rect").attr("x", 0).attr("width", 18).attr("height", 18).style("fill", myColor());
+          legend.append("text").attr("x", 0).attr("y", 9).attr("dy", ".35em").style("text-anchor", "end")
             .text(function(d) { return d.desc; });
 
-          // graphs
-          for (const sog_data of csv_data) {
-            const line = svg.append("g").append("path").datum(sog_data)
-              .attr("d", d3.line().x(d => xScale(d.x)) .y(d => yScale(d.y)))
-              .attr("stroke", "steelblue")
-              .style("stroke-width", 1.5)
-              .style("fill", "none");
+          // plot
+          var lineColor = myColor()
+          const series = svg.selectAll(".series").data(csv_data).join("g").attr("class", "series")
+            .attr("clip-path", "url(#clip)")
+            .attr("stroke", lineColor)
+            .attr("fill", lineColor)
+          ;
+          const lines = series.append("path").attr("class", "line")
+            .attr("stroke-width", 3.5).style("fill", "none")
+            .attr("d", d3.line().x(d => xScale(d.x)) .y(d => yScale(d.y)));
+          const points = series.selectAll(".point").data(d=>d).join("circle").attr("class", "point").attr("r", 5)
+            .attr("cx", d=>xScale(d.x)).attr("cy", d=>yScale(d.y));
 
-            svg.selectAll("point").data(sog_data).enter().append("circle")
-              .attr("class", "point")
-              .attr("r", 2)
-              .attr("cx", d => xScale(d.x))
-              .attr("cy", d => yScale(d.y));
+          // zooming
+          const zoom = d3.zoom().scaleExtent([0.5, 20]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
+          // rect to capture zoom events
+          svg.append("rect").attr("fill", "none").attr("pointer-events", "all").attr("width", width).attr("height", height).call(zoom);
+          svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height);
+
+          function zoomed(event) {
+            // new scales
+            const newX = event.transform.rescaleX(xScale);
+            const newY = event.transform.rescaleY(yScale);
+
+            // update axes
+            gxAxis.call(xAxis.scale(newX));
+            gyAxis.call(yAxis.scale(newY));
+
+            // update the lines and the circles
+            svg.selectAll(".line").attr("d", d3.line().x(d=>newX(d.x)).y(d=>newY(d.y)));
+            svg.selectAll(".point").attr("cx", d=>newX(d.x)).attr("cy", d=>newY(d.y));
           }
+
         }).catch(err => {
           console.error("Error loading files:", err);
         })
