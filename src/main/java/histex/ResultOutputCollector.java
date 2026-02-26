@@ -64,11 +64,16 @@ public class ResultOutputCollector {
     output.flush();
   }
 
-  public void fileAppend(String file, String string) throws IOException {
+  public File fileAppend(String file, String string) throws IOException {
     File f = path.resolve("./" + file).toFile();
     f.toPath().getParent().toFile().mkdirs();
     try(FileOutputStream fs = new FileOutputStream(f, true)) {
       fs.write(string.getBytes(StandardCharsets.UTF_8));
     }
+    return f;
+  }
+
+  public Path getPath() {
+    return path;
   }
 }

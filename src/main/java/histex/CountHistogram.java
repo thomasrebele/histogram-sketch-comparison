@@ -84,4 +84,15 @@ public abstract class CountHistogram implements Histogram {
   public int getMemoryUsageInBytes() {
     return Integer.BYTES * count.length;
   }
+
+  @Override
+  public String debugAsCsv() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("x,y\n");
+    for(int i=0; i<count.length; i++) {
+      float v = getBucketStart(i);
+      sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+    }
+    return sb.toString();
+  }
 }

@@ -21,4 +21,8 @@ public interface Histogram extends RankEstimator {
     }
     return result;
   }
+
+  default String debugAsCsv() {
+    return null;
+  }
 }

@@ -1,6 +1,7 @@
 package histex;
 
 import org.apache.datasketches.kll.KllFloatsSketch;
+import org.apache.datasketches.quantilescommon.FloatsSketchSortedView;
 
 import java.util.Arrays;
 
@@ -49,5 +50,16 @@ public class KllHistogram implements Histogram {
 
   public String getInfo() {
     return "[" + kll.getMinItem() + "," + kll.getMaxItem() + "]";
+  }
+
+  @Override
+  public String debugAsCsv() {
+    FloatsSketchSortedView sv = kll.getSortedView();
+    StringBuilder sb = new StringBuilder();
+    sb.append("x,y\n");
+    for(int i=0; i<sv.getQuantiles().length; i++) {
+      sb.append(sv.getQuantiles()[i]).append(",").append(sv.getCumulativeWeights()[i] / (double)kll.getN()).append("\n");
+    }
+    return sb.toString();
   }
 }

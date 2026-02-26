@@ -48,11 +48,12 @@
       console.log("basePath", basePath);
       console.log("toc", toc);
 
-      d3.csv("/" + toc).then(function(toc) {
+      d3.dsv("\t", "/" + toc).then(function(toc) {
         console.log(toc);
-        const data = toc.map(el => d3.csv(basePath+el.file));
+        const data = toc.map(el => d3.csv(basePath+el.file, d => {return {x:+d.x, y:+d.y}}));
         Promise.all(data).then(csv_data => {
           console.log("CSVs loaded");
+          console.log(csv_data);
 
           // plotting
           var myColor = () => d3.scaleOrdinal().domain(data)
@@ -62,10 +63,12 @@
           xmax = d3.max(csv_data, f=> d3.max(f, d=>d.x))
           ymin = d3.min(csv_data, f=> d3.min(f, d=>d.y))
           ymax = d3.max(csv_data, f=> d3.max(f, d=>d.y))
-          console.log(xmin, xmax);
+          console.log(xmin, xmax, xmin<xmax);
+          console.log(ymin, ymax, ymin<ymax);
 
           const xScale = d3.scaleLinear().domain([xmin, xmax]).nice().range([0, width]);
           const yScale = d3.scaleLinear().domain([ymin, ymax]).nice().range([height, 0]);
+          console.log("being nice ...");
           const xAxis = d3.axisBottom(xScale);
           const yAxis = d3.axisLeft(yScale);
           const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 680)").call(xAxis);
@@ -96,7 +99,7 @@
             .attr("cx", d=>xScale(d.x)).attr("cy", d=>yScale(d.y));
 
           // zooming
-          const zoom = d3.zoom().scaleExtent([0.5, 20]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
+          const zoom = d3.zoom().scaleExtent([0.05, 200]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
           // rect to capture zoom events
           svg.append("rect").attr("fill", "none").attr("pointer-events", "all").attr("width", width).attr("height", height).call(zoom);
           svg.append("defs").append("clipPath")

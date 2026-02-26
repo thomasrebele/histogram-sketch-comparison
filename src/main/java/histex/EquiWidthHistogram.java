@@ -1,5 +1,7 @@
 package histex;
 
+import org.apache.datasketches.quantilescommon.FloatsSketchSortedView;
+
 public class EquiWidthHistogram extends CountHistogram {
 
   final float start;
@@ -54,4 +56,6 @@ public class EquiWidthHistogram extends CountHistogram {
     }
     return (double)max / n;
   }
+
+
 }

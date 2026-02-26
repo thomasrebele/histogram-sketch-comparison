@@ -1,6 +1,8 @@
 package histex;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +14,11 @@ public class Main {
   public static void main(String[] args) throws IOException {
 
     ResultOutputCollector out = new ResultOutputCollector();
+
+    Path.of("draft-results/latest").toFile().delete();
+    ShellUtils.exec("ln", "-s", out.getPath().toAbsolutePath().toString(), "draft-results/latest");
+
+
     final long seed = new Random(System.nanoTime()).nextLong();
     out.println("seed: " + seed);
 
@@ -65,6 +72,9 @@ public class Main {
       final float rw = rangeWidth;
       Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(min, max - rw, 10000);
 
+      StringBuilder toc = new StringBuilder();
+      toc.append("file\tdesc\n");
+      String rangeDir = "/" + idx + "-range-" + rangeWidth;
       for (Histogram candidate : histograms) {
         Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
             goldstandard, candidate, sequence.get(), rangeWidth);
@@ -72,8 +82,15 @@ public class Main {
         out.println(desc + ": " + result);
 
         String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));
-        out.fileAppend("/" + idx + "-range-" + rangeWidth + "/" + candidate.getDesc(), samples);
+        out.fileAppend(rangeDir + "/samples-" + candidate.getDesc(), samples);
+        String csv = candidate.debugAsCsv();
+        if(csv != null) {
+          File f = out.fileAppend(rangeDir + "/histogram-" + candidate.getDesc() + ".csv",
+              candidate.debugAsCsv());
+          toc.append(f.getName()).append("\t").append("TODO").append("\n");
+        }
       }
+      out.fileAppend(rangeDir + "/toc.csv", toc.toString());
 
       rangeWidth *= 2;
     }
