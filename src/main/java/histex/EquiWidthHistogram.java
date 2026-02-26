@@ -7,8 +7,8 @@ public class EquiWidthHistogram extends CountHistogram {
   final int buckets;
   final float bucketWidth;
 
-  public EquiWidthHistogram(float start, float end, int buckets) {
-    super(buckets);
+  public EquiWidthHistogram(float start, float end, int buckets, boolean interpolate) {
+    super(buckets, interpolate);
     this.start = start;
     this.end = end;
     this.buckets = buckets;
@@ -17,7 +17,7 @@ public class EquiWidthHistogram extends CountHistogram {
 
   @Override
   public String getDesc() {
-    return "equi-width(k=" + buckets +")";
+    return "equi-width(k=" + buckets + ",interp=" + (interpolate ? "t" : "f") +")";
   }
 
   @Override
@@ -41,12 +41,17 @@ public class EquiWidthHistogram extends CountHistogram {
   }
 
   @Override
-  public double getMinNormalizedRankDifference() {
-    return 0;
-    //int max = 0;
-    //for (int i=0; i<count.length; i++) {
-    //  max = Math.max(max, count[i]);
-    //}
-    //return (double)max / n;
+  public double getMinNormalizedRankDifference(float start, float end) {
+    if (interpolate)
+      return 0;
+
+    int startBucket = getBucketForValue(start);
+    int endBucket = getBucketForValue(end);
+
+    int max = 0;
+    for (int i=startBucket; i<endBucket; i++) {
+      max = Math.max(max, count[i]);
+    }
+    return (double)max / n;
   }
 }

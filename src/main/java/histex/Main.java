@@ -16,7 +16,7 @@ public class Main {
     out.println("seed: " + seed);
 
     Supplier<FloatIterator> it =
-        FloatIteratorFactory.readFile("src/main/resources/tpcds-column-dumps/sf1/store_sales.ss_ext_list_price.zstd");
+        FloatIteratorFactory.readFile("src/main/resources/tpcds-column-dumps/sf100/item.i_brand_id.zstd");
 
     out.println("distribution: TODO" );
 
@@ -29,10 +29,11 @@ public class Main {
     float max = (float)tdigest.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
-    histograms.add(new EquiWidthHistogram(min, max, 1200));
-    histograms.add(new EquiWidthHistogram(min, max, 600));
-    histograms.add(new EquiWidthHistogram(min, max, 200));
-    histograms.add(new EquiWidthHistogram(min, max, 10));
+    histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+    histograms.add(new EquiWidthHistogram(min, max, 600, true));
+    histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    histograms.add(new EquiWidthHistogram(min, max, 10, true));
+    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
     histograms.add(new KllHistogram());
 
     for (Histogram h : histograms) {

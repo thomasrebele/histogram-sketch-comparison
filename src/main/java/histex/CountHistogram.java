@@ -6,11 +6,13 @@ import java.util.List;
 
 public abstract class CountHistogram implements Histogram {
 
+  final boolean interpolate;
   int n;
   protected int[] count;
 
-  public CountHistogram(int buckets) {
+  public CountHistogram(int buckets, boolean interpolate) {
     count = new int[buckets];
+    this.interpolate = interpolate;
   }
 
   @Override
@@ -45,7 +47,7 @@ public abstract class CountHistogram implements Histogram {
     double base = (double) c;
     double interp = 0;
 
-    if (i < count.length) {
+    if (interpolate && i < count.length) {
       float bucketStart = getBucketStart(i);
       float bucketEnd = getBucketEnd(i);
       interp = (v - bucketStart) / (bucketEnd - bucketStart) * count[i];

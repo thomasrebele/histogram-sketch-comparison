@@ -90,7 +90,7 @@ class CDFTest {
 
     int n = 100;
     DiscreteCDF.Datastream ds = cdf.prepareStream(n, ()->new Random(123)).get();
-    FixedBucketHistogram h = new FixedBucketHistogram(cdf.getBuckets());
+    FixedBucketHistogram h = new FixedBucketHistogram(cdf.getBuckets(), false);
 
     for (int i=0; i<n; i++) {
       h.addValue(ds.nextValue());

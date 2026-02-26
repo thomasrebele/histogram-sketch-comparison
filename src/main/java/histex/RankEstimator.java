@@ -10,7 +10,7 @@ public interface RankEstimator {
    */
   double getNormalizedRank(float v);
 
-  default double getMinNormalizedRankDifference() {
+  default double getMinNormalizedRankDifference(float start, float end) {
     return 0.0;
   }
 }

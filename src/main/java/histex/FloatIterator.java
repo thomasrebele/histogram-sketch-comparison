@@ -19,7 +19,7 @@ interface FloatIterator extends AutoCloseable {
   }
 
   static FloatIterator sequence(float start, float end, int n) {
-    return of(new EquiWidthHistogram(start, end, n).getBucketEnds());
+    return of(new EquiWidthHistogram(start, end, n, true).getBucketEnds());
   }
 
   float nextValue();

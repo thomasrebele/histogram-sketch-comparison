@@ -19,7 +19,7 @@ public class DiscreteCDFFactory {
     float start = mean-3*stddev;
     float end = mean+3*stddev;
 
-    EquiWidthHistogram h = new EquiWidthHistogram(start, end, buckets);
+    EquiWidthHistogram h = new EquiWidthHistogram(start, end, buckets, false);
 
     for(int i=0; i<h.buckets; i++) {
     }

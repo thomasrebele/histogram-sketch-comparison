@@ -6,14 +6,14 @@ public class FixedBucketHistogram extends CountHistogram {
 
   float[] buckets;
 
-  public FixedBucketHistogram(float[] buckets) {
-    super(buckets.length);
+  public FixedBucketHistogram(float[] buckets, boolean interpolate) {
+    super(buckets.length, interpolate);
     this.buckets = Arrays.copyOf(buckets, buckets.length);
   }
 
   @Override
   public String getDesc() {
-    return "fixed-buckets(k=" + buckets.length +")";
+    return "fixed-buckets(k=" + buckets.length + ",interp=" + (interpolate ? "t" : "f") +")";
   }
 
 

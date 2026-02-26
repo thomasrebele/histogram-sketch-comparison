@@ -11,7 +11,7 @@ class HistogramTest {
 
   @Test
   void test() {
-    FixedBucketHistogram h = new FixedBucketHistogram(new float[]{10, 50, 500, 1000});
+    FixedBucketHistogram h = new FixedBucketHistogram(new float[]{10, 50, 500, 1000}, false);
     assertThrows(IllegalStateException.class, () -> {
       h.addValue(9);
     });

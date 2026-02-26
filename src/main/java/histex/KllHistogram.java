@@ -33,7 +33,7 @@ public class KllHistogram implements Histogram {
   }
 
   @Override
-  public double getMinNormalizedRankDifference() {
+  public double getMinNormalizedRankDifference(float start, float end) {
     return kll.getNormalizedRankError(false);
   }
 
