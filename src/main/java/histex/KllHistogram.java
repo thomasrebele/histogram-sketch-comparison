@@ -58,7 +58,9 @@ public class KllHistogram implements Histogram {
     StringBuilder sb = new StringBuilder();
     sb.append("x,y\n");
     for(int i=0; i<sv.getQuantiles().length; i++) {
-      sb.append(sv.getQuantiles()[i]).append(",").append(sv.getCumulativeWeights()[i] / (double)kll.getN()).append("\n");
+      float v = sv.getQuantiles()[i];
+      double normalizedRank = getNormalizedRank(v);
+      sb.append(v).append(",").append(normalizedRank).append("\n");
     }
     return sb.toString();
   }

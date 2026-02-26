@@ -74,6 +74,8 @@ public class Main {
 
       StringBuilder toc = new StringBuilder();
       toc.append("file\tdesc\n");
+      StringBuilder tocDiff = new StringBuilder();
+      tocDiff.append("file\tdesc\n");
       String rangeDir = "/" + idx + "-range-" + rangeWidth;
       for (Histogram candidate : histograms) {
         Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
@@ -85,12 +87,17 @@ public class Main {
         out.fileAppend(rangeDir + "/samples-" + candidate.getDesc(), samples);
         String csv = candidate.debugAsCsv();
         if(csv != null) {
-          File f = out.fileAppend(rangeDir + "/histogram-" + candidate.getDesc() + ".csv",
-              candidate.debugAsCsv());
+          File f = out.fileAppend(rangeDir + "/histogram-" + candidate.getDesc() + ".csv", csv);
           toc.append(f.getName()).append("\t").append(candidate.getDesc()).append("\n");
+        }
+        String diffCsv = candidate.debugDiffAsCsv(goldstandard);
+        if(diffCsv != null) {
+          File f = out.fileAppend(rangeDir + "/histogram-" + candidate.getDesc() + "-diff.csv", diffCsv);
+          tocDiff.append(f.getName()).append("\t").append(candidate.getDesc()).append("\n");
         }
       }
       out.fileAppend(rangeDir + "/toc.csv", toc.toString());
+      out.fileAppend(rangeDir + "/toc-diff.csv", tocDiff.toString());
 
       rangeWidth *= 2;
     }

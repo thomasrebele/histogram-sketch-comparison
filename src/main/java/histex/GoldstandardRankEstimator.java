@@ -18,6 +18,14 @@ public class GoldstandardRankEstimator implements RankEstimator {
     Collections.sort(values);
   }
 
+  float getMin() {
+    return values.get(0);
+  }
+
+  float getMax() {
+    return values.get(values.size()-1);
+  }
+
   @Override
   public String getDesc() {
     return "goldstandard";
