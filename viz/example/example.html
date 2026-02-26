@@ -18,6 +18,15 @@
       <div id="chart" class="graph"></div>
     </main>
     <script>
+      // parse parameters
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams(url.search);
+      
+      const toc = params.get('toc');
+      
+      console.log(`toc: ${toc}`);
+
+      // setup diagram
       const container = document.getElementById("chart");
       const width = 1000; // container.clientWidth;
       const height = 800; // container.clientHeight;
@@ -30,13 +39,22 @@
 
       const legendContainer = svg.append("g").attr("transform", "translate(450,200)");
 
-      d3.csv("toc.csv").then(function(toc) {
+      // load data
+      var basePath = "/";
+      if(toc.lastIndexOf("/") >= 0) {
+        basePath = "/" + toc.substr(0,toc.lastIndexOf("/")+1);
+      }
+
+      console.log("basePath", basePath);
+      console.log("toc", toc);
+
+      d3.csv("/" + toc).then(function(toc) {
         console.log(toc);
-        const data = toc.map(el => d3.csv(el.file));
+        const data = toc.map(el => d3.csv(basePath+el.file));
         Promise.all(data).then(csv_data => {
           console.log("CSVs loaded");
 
-
+          // plotting
           var myColor = () => d3.scaleOrdinal().domain(data)
             .range(["gold", "blue", "green", "yellow", "black", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
           // axis
