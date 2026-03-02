@@ -28,35 +28,35 @@ public class Main {
     out.println("distribution: TODO" );
 
     Supplier<? extends FloatIterator> ds = it;
+    GoldstandardRankEstimator goldstandard = new GoldstandardRankEstimator(ds);
 
-    TDigestHistogram tdigest = new TDigestHistogram();
-    tdigest.consume(ds.get());
-
-    float min = (float)tdigest.getMin();
-    float max = (float)tdigest.getMax();
+    float min = goldstandard.getMin();
+    float max = goldstandard.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
     histograms.add(new EquiWidthHistogram(min, max, 1200, true));
     histograms.add(new EquiWidthHistogram(min, max, 600, true));
     histograms.add(new EquiWidthHistogram(min, max, 200, true));
     histograms.add(new EquiWidthHistogram(min, max, 10, true));
-    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+    histograms.add(new EquiWidthHistogram(min, max, 10, false));
+    histograms.add(goldstandard.convertToEquiHeightHistogram(10, true));
+    histograms.add(goldstandard.convertToEquiHeightHistogram(10, false));
+
     histograms.add(new KllHistogram());
+    histograms.add(new TDigestHistogram());
 
     for (Histogram h : histograms) {
       h.consume(ds.get());
     }
-
-    histograms.add(tdigest);
 
     out.println("memory usage in bytes:");
     for (Histogram h : histograms) {
       out.println(h.getDesc() + ", mem size: " + h.getMemoryUsageInBytes() + ", n=" + h.getN());
     }
 
-    out.println("range of values: " + tdigest.getInfo());
+    out.println("range of values: [" + min + "," + max + "]");
 
-    GoldstandardRankEstimator goldstandard = new GoldstandardRankEstimator(ds);
 
     out.println("");
     out.println("compare the multiplicative accuracy of range predicate selectivity");

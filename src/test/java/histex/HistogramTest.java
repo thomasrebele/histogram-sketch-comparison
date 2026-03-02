@@ -29,4 +29,18 @@ class HistogramTest {
       h.addValue(1000f);
     });
   }
+
+  @Test
+  void testEquiHeight() {
+    float[] values = { 10, 11, 12, 13, 50 };
+    var gs = new GoldstandardRankEstimator(() -> FloatIterator.of(values));
+    var ehHist = gs.convertToEquiHeightHistogram(5, false);
+    ehHist.consume(FloatIterator.of(values));
+
+    assertEquals(0.0, ehHist.getNormalizedRank(10));
+    assertEquals(0.2, ehHist.getNormalizedRank(11));
+    assertEquals(0.4, ehHist.getNormalizedRank(12));
+    assertEquals(0.6, ehHist.getNormalizedRank(13));
+    assertEquals(0.8, ehHist.getNormalizedRank(50));
+  }
 }

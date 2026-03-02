@@ -37,6 +37,19 @@ public class TDigestHistogram implements Histogram {
     return tdigest.toByteArray().length;
   }
 
+  @Override
+  public String debugAsCsv() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("x,y\n");
+    for(int i=0; i<200; i++) {
+      float range = (float) (tdigest.getMaxValue() - tdigest.getMinValue());
+      float v = (float) (tdigest.getMinValue()+(i*range/200));
+      double normalizedRank = getNormalizedRank(v);
+      sb.append(v).append(",").append(normalizedRank).append("\n");
+    }
+    return sb.toString();
+  }
+
   public String getInfo() {
     return "[" + tdigest.getMinValue() + "," + tdigest.getMaxValue() + "]";
   }

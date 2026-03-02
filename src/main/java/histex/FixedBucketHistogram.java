@@ -4,28 +4,28 @@ import java.util.Arrays;
 
 public class FixedBucketHistogram extends CountHistogram {
 
-  float[] buckets;
+  float[] boundaries;
 
-  public FixedBucketHistogram(float[] buckets, boolean interpolate) {
-    super(buckets.length, interpolate);
-    this.buckets = Arrays.copyOf(buckets, buckets.length);
+  public FixedBucketHistogram(float[] boundaries, boolean interpolate) {
+    super(boundaries.length-1, interpolate);
+    this.boundaries = Arrays.copyOf(boundaries, boundaries.length);
   }
 
   @Override
   public String getDesc() {
-    return "fixed-buckets(k=" + buckets.length + ",interp=" + (interpolate ? "t" : "f") +")";
+    return "fixed-buckets(k=" + boundaries.length + ",interp=" + (interpolate ? "t" : "f") +")";
   }
 
 
   @Override
   public int getBucketForValue(float v) {
-    int bi = Arrays.binarySearch(buckets, v);
+    int bi = Arrays.binarySearch(boundaries, v);
     if (bi < 0) {
       bi = -(bi+1);
       if (bi == 0) {throw new IllegalStateException();}
       bi -= 1;
     }
-    if (bi == count.length-1) {
+    if (bi >= count.length) {
       throw new IllegalStateException();
     }
     return bi;
@@ -33,11 +33,11 @@ public class FixedBucketHistogram extends CountHistogram {
 
   @Override
   float getBucketStart(int bucketIndex) {
-    return buckets[bucketIndex];
+    return boundaries[bucketIndex];
   }
 
   @Override
   public int getMemoryUsageInBytes() {
-    return Float.BYTES * buckets.length + super.getMemoryUsageInBytes();
+    return Float.BYTES * boundaries.length + super.getMemoryUsageInBytes();
   }
 }

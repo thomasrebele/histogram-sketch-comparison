@@ -21,13 +21,13 @@ public abstract class CountHistogram implements Histogram {
   }
 
   public List<Integer> getCounts() {
-    return Arrays.stream(count).limit(count.length-1).boxed().toList();
+    return Arrays.stream(count).limit(count.length).boxed().toList();
   }
 
   public List<Integer> getCumulativeCounts() {
     List<Integer> result = new ArrayList<>();
     var sum = 0;
-    for (int i=0; i<count.length-1; i++) {
+    for (int i=0; i<count.length; i++) {
       sum += count[i];
       result.add(sum);
     }
@@ -44,16 +44,27 @@ public abstract class CountHistogram implements Histogram {
       c += count[i];
     }
 
-    double base = (double) c;
     double interp = 0;
 
-    if (interpolate && i < count.length) {
-      float bucketStart = getBucketStart(i);
-      float bucketEnd = getBucketEnd(i);
-      interp = (v - bucketStart) / (bucketEnd - bucketStart) * count[i];
-      interp = Math.clamp(interp, 0, count[i]);
+    if (interpolate) {
+      if (i < count.length) {
+        float bucketStart = getBucketStart(i);
+        float bucketEnd = getBucketEnd(i);
+        interp = (v - bucketStart) / (bucketEnd - bucketStart) * count[i];
+        interp = Math.clamp(interp, 0, count[i]);
+      }
     }
-
+    else {
+      float bucketEnd = getBucketStart(i);
+      for (; i<count.length; i++) {
+        if (v <= bucketEnd) {
+          break;
+        }
+        c += count[i];
+        bucketEnd = getBucketEnd(i);
+      }
+    }
+    double base = c;
     return (base + interp)/n;
   }
 
@@ -92,8 +103,18 @@ public abstract class CountHistogram implements Histogram {
     float v = getBucketStart(0);
     sb.append(v).append(",").append(0).append("\n");
     for(int i=0; i<count.length; i++) {
+      if (!interpolate) {
+        v = Math.nextDown(getBucketEnd(i));
+        sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+      }
+
       v = getBucketEnd(i);
       sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+
+      if (!interpolate) {
+        v = Math.nextUp(getBucketEnd(i));
+        sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+      }
     }
     return sb.toString();
   }
