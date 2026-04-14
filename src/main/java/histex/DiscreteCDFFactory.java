@@ -1,6 +1,5 @@
 package histex;
 
-import histex.DiscreteCDF.Point;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class DiscreteCDFFactory {

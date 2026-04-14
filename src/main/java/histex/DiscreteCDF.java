@@ -50,8 +50,8 @@ public class DiscreteCDF {
     // convert to CDF points
     Point[] points = new Point[rankPoints.length];
     for(int i=0; i<points.length; i++) {
-      float x = rankPoints[i].x;
-      float y = rankPoints[Math.min(i+1, points.length-1)].y;
+      float x = rankPoints[i].x();
+      float y = rankPoints[Math.min(i+1, points.length-1)].y();
       points[i] = new Point(x, y);
     }
     return new DiscreteCDF(desc, points);
@@ -73,8 +73,8 @@ public class DiscreteCDF {
         if (v<remaining[i]) {
           remaining[i] -= 1;
           remainingCount -= 1;
-          float start = ps[i].x;
-          float end = ps[i+1].x;
+          float start = ps[i].x();
+          float end = ps[i+1].x();
           return rnd.nextFloat(start, Math.nextUp(end));
         }
         v -= remaining[i];
@@ -85,13 +85,6 @@ public class DiscreteCDF {
     @Override
     public boolean hasNext() {
       return remainingCount > 0;
-    }
-  }
-
-  record Point(float x, float y) implements Comparable<Point> {
-    @Override
-    public int compareTo(Point o) {
-      return Float.compare(this.x, o.x);
     }
   }
 
@@ -107,23 +100,23 @@ public class DiscreteCDF {
 
     var y = 0f;
     for (Point p : ps) {
-      if (p.y < 0 || p.y > 1) {
+      if (p.y() < 0 || p.y() > 1) {
         throw new IllegalArgumentException("y-values (normalized rank) must be in the interval [0,1]");
       }
-      if (p.y < y) {
+      if (p.y() < y) {
         throw new IllegalArgumentException("y-values (normalized rank) must be monotonically non-decreasing");
       }
-      y = p.y;
+      y = p.y();
     }
 
-    if (ps[ps.length-1].y != 1) throw new IllegalArgumentException("there must be a point with rank 1");
+    if (ps[ps.length-1].y() != 1) throw new IllegalArgumentException("there must be a point with rank 1");
 
     this.desc = description;
   }
 
   public String getDesc() {
     return "discrete CDF " + desc
-        + " start=" + ps[0].x + " end="+ps[ps.length-1].x+" points="+ps.length;
+        + " start=" + ps[0].x() + " end="+ps[ps.length-1].x()+" points="+ps.length;
   }
 
   public Supplier<Datastream> prepareStream(int n, Supplier<Random> rndSupplier) {
@@ -134,8 +127,8 @@ public class DiscreteCDF {
     var y = 0f;
     for (int i=0; i<ps.length-1; i++) {
       var p = ps[i];
-      var part = p.y - y;
-      y = p.y;
+      var part = p.y() - y;
+      y = p.y();
       float exact = n * part;
       bucketSize[i] = (int) Math.floor(exact);
       remaining[i] = exact - bucketSize[i];
@@ -179,7 +172,7 @@ public class DiscreteCDF {
   public float[] getBuckets() {
     float[] buckets = new float[ps.length];
     for (int i=0; i<ps.length; i++) {
-      buckets[i] = ps[i].x;
+      buckets[i] = ps[i].x();
     }
     return buckets;
   }
