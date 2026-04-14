@@ -2,6 +2,8 @@ package histex;
 
 import org.apache.datasketches.tdigest.TDigestDouble;
 
+import java.util.List;
+
 public class TDigestHistogram implements Histogram {
 
   private final TDigestDouble tdigest;
@@ -39,13 +41,12 @@ public class TDigestHistogram implements Histogram {
 
   @Override
   public String debugAsCsv() {
+
     StringBuilder sb = new StringBuilder();
     sb.append("x,y\n");
-    for(int i=0; i<200; i++) {
-      float range = (float) (tdigest.getMaxValue() - tdigest.getMinValue());
-      float v = (float) (tdigest.getMinValue()+(i*range/200));
-      double normalizedRank = getNormalizedRank(v);
-      sb.append(v).append(",").append(normalizedRank).append("\n");
+    List<Point> points = HistSampling.localDynamic((float) tdigest.getMinValue(), (float) tdigest.getMaxValue(), 10, this);
+    for (Point p : points) {
+      sb.append(p.x()).append(",").append(p.y()).append("\n");
     }
     return sb.toString();
   }
