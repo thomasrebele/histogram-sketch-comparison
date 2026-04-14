@@ -45,6 +45,7 @@ public class Main {
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
     histograms.add(new KllHistogram());
+    histograms.add(new SplineSketchHistogram(200));
     histograms.add(new TDigestHistogram());
 
     for (Histogram h : histograms) {
