@@ -49,9 +49,23 @@
       console.log("toc", toc);
 
       d3.dsv("\t", "/" + toc).then(function(toc) {
+        // add line identifier
+        var lineIdx = 0;
+        for (line of toc) {
+          line.id = "line" + lineIdx;
+          lineIdx += 1;
+        }
+
         console.log(toc);
         const data = toc.map(el => d3.csv(basePath+el.file, d => {return {x:+d.x, y:+d.y}}));
         Promise.all(data).then(csv_data => {
+          // add line identifier
+          var lineIdx = 0;
+          for (line of csv_data) {
+            line.id = "line" + lineIdx;
+            lineIdx += 1;
+          }
+
           console.log("CSVs loaded");
           console.log(csv_data);
 
@@ -78,8 +92,17 @@
           var legend = legendContainer.selectAll(".legend")
             .data(toc)
             .enter().append("g")
-              .attr("class", "legend")
-              .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+              .attr("class", (d, i) => "legend line" + i)
+              .attr("transform", (d,i) => "translate(0," + i * 20 + ")")
+              .on("mouseover", (ev,d) => {
+                console.log("mouseover", ev, d);
+                svg.selectAll("." + d.id + " path").style("stroke-width", "10");
+              })
+              .on("mouseout", (ev, d) => {
+                console.log("mouseout", ev, d);
+                svg.selectAll("." + d.id + " path").style("stroke-width", "2.5");
+              });
+          ;
 
           legend.append("rect").attr("x", 0).attr("width", 18).attr("height", 18).style("fill", myColor());
           legend.append("text").attr("x", 0).attr("y", 9).attr("dy", ".35em").style("text-anchor", "end")
@@ -87,7 +110,8 @@
 
           // plot
           var lineColor = myColor()
-          const series = svg.selectAll(".series").data(csv_data).join("g").attr("class", "series")
+          const series = svg.selectAll(".series").data(csv_data).join("g")
+            .attr("class", (d,i) => "series line" + i)
             .attr("clip-path", "url(#clip)")
             .attr("stroke", lineColor)
             .attr("fill", lineColor)
