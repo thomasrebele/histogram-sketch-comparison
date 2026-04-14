@@ -13,7 +13,7 @@ public class FixedBucketHistogram extends CountHistogram {
 
   @Override
   public String getDesc() {
-    return "fixed-buckets(k=" + boundaries.length + ",interp=" + (interpolate ? "t" : "f") +")";
+    return "fixed-buckets(k=" + count.length + ",interp=" + (interpolate ? "t" : "f") +")";
   }
 
 

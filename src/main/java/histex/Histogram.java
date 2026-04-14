@@ -22,20 +22,5 @@ public interface Histogram extends RankEstimator {
     return result;
   }
 
-  default String debugAsCsv() {
-    return null;
-  }
 
-  default String debugDiffAsCsv(GoldstandardRankEstimator goldstandard) {
-    float min = goldstandard.getMin();
-    float max = goldstandard.getMax();
-
-    StringBuilder sb = new StringBuilder();
-    sb.append("x,y\n");
-    for(int i=0; i<100; i++) {
-      float v = min + (float)i/100 * (max-min);
-      sb.append(v).append(",").append(getNormalizedRank(v) - goldstandard.getNormalizedRank(v)).append("\n");
-    }
-    return sb.toString();
-  }
 }

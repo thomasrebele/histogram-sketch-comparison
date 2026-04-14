@@ -37,11 +37,12 @@ public class Main {
     histograms.add(new EquiWidthHistogram(min, max, 1200, true));
     histograms.add(new EquiWidthHistogram(min, max, 600, true));
     histograms.add(new EquiWidthHistogram(min, max, 200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 10, true));
+    histograms.add(new EquiWidthHistogram(min, max, 11, true));
     //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
-    histograms.add(new EquiWidthHistogram(min, max, 10, false));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(10, true));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(10, false));
+    EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
+    histograms.add(e);
+    histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+    histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
     histograms.add(new KllHistogram());
     histograms.add(new TDigestHistogram());
@@ -57,6 +58,9 @@ public class Main {
 
     out.println("range of values: [" + min + "," + max + "]");
 
+    List<RankEstimator> estimators = new ArrayList<>();
+    estimators.addAll(histograms);
+    estimators.add(goldstandard);
 
     out.println("");
     out.println("compare the multiplicative accuracy of range predicate selectivity");
@@ -77,10 +81,10 @@ public class Main {
       StringBuilder tocDiff = new StringBuilder();
       tocDiff.append("file\tdesc\n");
       String rangeDir = "/" + idx + "-range-" + rangeWidth;
-      for (Histogram candidate : histograms) {
+      for (RankEstimator candidate : estimators) {
         Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
             goldstandard, candidate, sequence.get(), rangeWidth);
-        String desc = String.format("%20s", candidate.getDesc());
+        String desc = String.format("%30s", candidate.getDesc());
         out.println(desc + ": " + result);
 
         String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));

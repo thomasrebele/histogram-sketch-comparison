@@ -71,6 +71,7 @@ public class Measure {
       //System.out.println("ratio: " + (r1/r2) + "      r1 " + r1 + "  r2 " + r2 + "   r1es " + r1e + " " + r1s + "  r2es " + r2e + " " + r2s);
       if (r1 == 0 && r2 == 0) {
         zeroBoth += 1;
+        valid += 1;
       }
       if (r1 == 0) {
         zeroH1 += 1;
@@ -88,7 +89,8 @@ public class Measure {
         r1 = tmp;
       }
 
-      diff += Math.log(r1) - Math.log(r2);
+      double logRatio = Math.log(r1) - Math.log(r2);
+      diff += logRatio;
       valid++;
     }
     diff /= Math.log(10);

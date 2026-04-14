@@ -57,7 +57,7 @@ public abstract class CountHistogram implements Histogram {
     else {
       float bucketEnd = getBucketStart(i);
       for (; i<count.length; i++) {
-        if (v <= bucketEnd) {
+        if (v < bucketEnd) {
           break;
         }
         c += count[i];
@@ -102,20 +102,34 @@ public abstract class CountHistogram implements Histogram {
     sb.append("x,y\n");
     float v = getBucketStart(0);
     sb.append(v).append(",").append(0).append("\n");
+
+    if (!interpolate) {
+      v = Math.nextUp(v);
+      sb.append(v).append(",").append(0).append("\n");
+    }
+
     for(int i=0; i<count.length; i++) {
       if (!interpolate) {
         v = Math.nextDown(getBucketEnd(i));
-        sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+        appendPointToCsv(sb, v);
       }
 
       v = getBucketEnd(i);
-      sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+      appendPointToCsv(sb, v);
 
       if (!interpolate) {
         v = Math.nextUp(getBucketEnd(i));
-        sb.append(v).append(",").append(getNormalizedRank(v)).append("\n");
+        appendPointToCsv(sb, v);
       }
     }
     return sb.toString();
+  }
+
+  private void appendPointToCsv(StringBuilder sb, float v) {
+    double rank = getNormalizedRank(v);
+    if (Double.isNaN(rank)) {
+      return;
+    }
+    sb.append(v).append(",").append(rank).append("\n");
   }
 }
