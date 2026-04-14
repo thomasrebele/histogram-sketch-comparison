@@ -37,6 +37,14 @@
         .append("g")
         .attr("transform", "translate(50,50)");
 
+      // rect to capture zoom events
+      const rect = svg.append("rect").attr("fill", "none").attr("pointer-events", "all").attr("width", width).attr("height", height);
+      svg.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
       const legendContainer = svg.append("g").attr("transform", "translate(200,0)");
 
       // load data
