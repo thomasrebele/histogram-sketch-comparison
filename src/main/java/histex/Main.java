@@ -34,18 +34,19 @@ public class Main {
     float max = goldstandard.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
-    histograms.add(new EquiWidthHistogram(min, max, 1200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 600, true));
-    histograms.add(new EquiWidthHistogram(min, max, 200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 11, true));
-    //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
-    EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
-    histograms.add(e);
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 600, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 11, true));
+    ////histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+    //EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
+    //histograms.add(e);
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
     histograms.add(new KllHistogram());
-    histograms.add(new TDigestHistogram());
+    histograms.add(new KllMergingHistogram());
+    //histograms.add(new TDigestHistogram());
 
     for (Histogram h : histograms) {
       h.consume(ds.get());
