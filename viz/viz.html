@@ -57,29 +57,23 @@
       console.log("toc", toc);
 
       d3.dsv("\t", "/" + toc).then(function(toc) {
-        // add line identifier
-        var lineIdx = 0;
-        for (line of toc) {
-          line.id = "line" + lineIdx;
-          lineIdx += 1;
-        }
-
         console.log(toc);
         const data = toc.map(el => d3.csv(basePath+el.file, d => {return {x:+d.x, y:+d.y}}));
         Promise.all(data).then(csv_data => {
-          // add line identifier
-          var lineIdx = 0;
-          for (line of csv_data) {
-            line.id = "line" + lineIdx;
-            lineIdx += 1;
+          // combine data
+          for (var i=0; i<toc.length; i++) {
+            csv_data[i].id = "line" + i;
+            csv_data[i].toc = toc[i];
           }
 
           console.log("CSVs loaded");
           console.log(csv_data);
 
           // plotting
-          var myColor = () => d3.scaleOrdinal().domain(data)
-            .range(["blue", "green", "yellow", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
+          console.log("data", data);
+          var myColor = () => d3.scaleOrdinal().domain(csv_data)
+            // https://sashamaps.net/docs/resources/20-colors/
+            .range(['#e6194B', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabed4', '#469990', '#dcbeff', '#9A6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff', '#000000']);
           // axis
           xmin = d3.min(csv_data, f=> d3.min(f, d=>d.x))
           xmax = d3.max(csv_data, f=> d3.max(f, d=>d.x))
@@ -98,7 +92,7 @@
 
           // legend
           var legend = legendContainer.selectAll(".legend")
-            .data(toc)
+            .data(csv_data)
             .enter().append("g")
               .attr("class", (d, i) => "legend line" + i)
               .attr("transform", (d,i) => "translate(0," + i * 20 + ")")
@@ -114,7 +108,7 @@
 
           legend.append("rect").attr("x", 0).attr("width", 18).attr("height", 18).style("fill", myColor());
           legend.append("text").attr("x", 0).attr("y", 9).attr("dy", ".35em").style("text-anchor", "end")
-            .text(function(d) { return d.desc; });
+            .text(function(d) { return d.toc.desc; });
 
           // plot
           var lineColor = myColor()
