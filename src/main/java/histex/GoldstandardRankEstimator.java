@@ -67,10 +67,6 @@ public class GoldstandardRankEstimator implements RankEstimator {
   @Override
   public String debugAsCsv() {
     List<Point> points = getInterestingPoints();
-    System.out.println("interesting: " + points.size());
-
-    List<Point> sample = sampleEquiWidthAndNeighbors();
-    System.out.println("ewan: " + sample.size());
     return Point.toCsv(points);
   }
 
@@ -86,7 +82,10 @@ public class GoldstandardRankEstimator implements RankEstimator {
         points.add(new Point(last, (float) getNormalizedRank(last)));
 
         v = values.get(i);
-        if (Math.nextDown(v) > last) v = Math.nextDown(v);
+        if (Math.nextDown(v) > last) {
+          float tmp = Math.nextDown(v);
+          points.add(new Point(tmp, (float) getNormalizedRank(tmp)));
+        }
         points.add(new Point(v, (float) getNormalizedRank(v)));
       }
     }

@@ -1,6 +1,8 @@
 package histex.sketches;
 
+import histex.HistSampling;
 import histex.Histogram;
+import histex.Point;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,38 +102,37 @@ public abstract class CountHistogram implements Histogram {
 
   @Override
   public String debugAsCsv() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("x,y\n");
+    List<Point> points = new ArrayList<>();
     float v = getBucketStart(0);
-    sb.append(v).append(",").append(0).append("\n");
+    points.add(new Point(v, 0));
 
     if (!interpolate) {
       v = Math.nextUp(v);
-      sb.append(v).append(",").append(0).append("\n");
+      points.add(new Point(v, 0));
     }
 
     for(int i=0; i<count.length; i++) {
       if (!interpolate) {
         v = Math.nextDown(getBucketEnd(i));
-        appendPointToCsv(sb, v);
+        addPoint(points, v);
       }
 
       v = getBucketEnd(i);
-      appendPointToCsv(sb, v);
+      addPoint(points, v);
 
       if (!interpolate) {
         v = Math.nextUp(getBucketEnd(i));
-        appendPointToCsv(sb, v);
+        addPoint(points, v);
       }
     }
-    return sb.toString();
+    return Point.toCsv(HistSampling.extractInterestingPoints(points) );
   }
 
-  private void appendPointToCsv(StringBuilder sb, float v) {
+  private void addPoint(List<Point> points, float v) {
     double rank = getNormalizedRank(v);
     if (Double.isNaN(rank)) {
       return;
     }
-    sb.append(v).append(",").append(rank).append("\n");
+    points.add(new Point(v, (float) rank));
   }
 }

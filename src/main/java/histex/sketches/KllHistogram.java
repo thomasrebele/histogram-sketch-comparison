@@ -1,10 +1,14 @@
 package histex.sketches;
 
+import histex.HistSampling;
 import histex.Histogram;
+import histex.Point;
 import org.apache.datasketches.kll.KllFloatsSketch;
 import org.apache.datasketches.quantilescommon.FloatsSketchSortedView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class KllHistogram implements Histogram {
 
@@ -56,13 +60,16 @@ public class KllHistogram implements Histogram {
   @Override
   public String debugAsCsv() {
     FloatsSketchSortedView sv = kll.getSortedView();
-    StringBuilder sb = new StringBuilder();
-    sb.append("x,y\n");
+    List<Point> points = new ArrayList<>();
     for(int i=0; i<sv.getQuantiles().length; i++) {
       float v = sv.getQuantiles()[i];
+      if (!points.isEmpty() && points.getLast().x() == v) {
+        continue;
+      }
+
       double normalizedRank = getNormalizedRank(v);
-      sb.append(v).append(",").append(normalizedRank).append("\n");
+      points.add(new Point(v, (float) normalizedRank));
     }
-    return sb.toString();
+    return Point.toCsv(HistSampling.extractInterestingPoints(points));
   }
 }
