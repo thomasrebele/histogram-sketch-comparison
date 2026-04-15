@@ -1,5 +1,7 @@
 package histex;
 
+import histex.sketches.EquiWidthHistogram;
+
 interface FloatIterator extends AutoCloseable {
   static FloatIterator of(float[] values) {
     return new FloatIterator() {

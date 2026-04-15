@@ -1,5 +1,7 @@
 package histex;
 
+import histex.sketches.FixedBucketHistogram;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Supplier;

@@ -1,5 +1,6 @@
 package histex;
 
+import histex.sketches.EquiWidthHistogram;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class DiscreteCDFFactory {

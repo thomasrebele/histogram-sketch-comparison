@@ -1,8 +1,10 @@
-package histex;
+package histex.sketches;
 
-import histex.splinesketch.SplineSketch;
+import histex.HistSampling;
+import histex.Histogram;
+import histex.Point;
+import histex.sketches.splinesketch.SplineSketch;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package histex;
 
+import histex.sketches.FixedBucketHistogram;
+import histex.sketches.KllHistogram;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

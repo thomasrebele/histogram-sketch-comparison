@@ -1,5 +1,6 @@
-package histex;
+package histex.sketches;
 
+import histex.Histogram;
 import org.apache.datasketches.kll.KllFloatsSketch;
 import org.apache.datasketches.quantilescommon.FloatsSketchSortedView;
 

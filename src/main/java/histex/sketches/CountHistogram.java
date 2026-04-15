@@ -1,4 +1,6 @@
-package histex;
+package histex.sketches;
+
+import histex.Histogram;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,9 +79,9 @@ public abstract class CountHistogram implements Histogram {
 
   abstract int getBucketForValue(float v);
 
-  abstract float getBucketStart(int bucketIndex);
+  public abstract float getBucketStart(int bucketIndex);
 
-  float getBucketEnd(int bucketIndex) {
+  public float getBucketEnd(int bucketIndex) {
     return getBucketStart(bucketIndex+1);
   }
 

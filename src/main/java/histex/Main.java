@@ -1,5 +1,10 @@
 package histex;
 
+import histex.sketches.EquiWidthHistogram;
+import histex.sketches.KllHistogram;
+import histex.sketches.SplineSketchHistogram;
+import histex.sketches.TDigestHistogram;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,5 +1,8 @@
-package histex;
+package histex.sketches;
 
+import histex.HistSampling;
+import histex.Histogram;
+import histex.Point;
 import org.apache.datasketches.tdigest.TDigestDouble;
 
 import java.util.List;

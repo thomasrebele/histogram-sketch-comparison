@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package histex.splinesketch;
+package histex.sketches.splinesketch;
 
 
 import java.util.ArrayList;

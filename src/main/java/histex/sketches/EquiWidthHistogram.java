@@ -1,12 +1,10 @@
-package histex;
-
-import org.apache.datasketches.quantilescommon.FloatsSketchSortedView;
+package histex.sketches;
 
 public class EquiWidthHistogram extends CountHistogram {
 
   final float start;
   final float end;
-  final int buckets;
+  public final int buckets;
   final float bucketWidth;
 
   public EquiWidthHistogram(float start, float end, int buckets, boolean interpolate) {
@@ -29,7 +27,7 @@ public class EquiWidthHistogram extends CountHistogram {
   }
 
   @Override
-  float getBucketStart(int bucketIndex) {
+  public float getBucketStart(int bucketIndex) {
     return start + bucketWidth * bucketIndex;
   }
 

@@ -1,4 +1,4 @@
-package histex;
+package histex.sketches;
 
 import java.util.Arrays;
 
@@ -32,7 +32,7 @@ public class FixedBucketHistogram extends CountHistogram {
   }
 
   @Override
-  float getBucketStart(int bucketIndex) {
+  public float getBucketStart(int bucketIndex) {
     return boundaries[bucketIndex];
   }
 
