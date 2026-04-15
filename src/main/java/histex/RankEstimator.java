@@ -26,7 +26,11 @@ public interface RankEstimator {
     sb.append("x,y\n");
     for(int i=0; i<100; i++) {
       float v = min + (float)i/100 * (max-min);
-      sb.append(v).append(",").append(getNormalizedRank(v) - goldstandard.getNormalizedRank(v)).append("\n");
+      float diff = (float) (getNormalizedRank(v) - goldstandard.getNormalizedRank(v));
+      if (Float.isNaN(diff)) {
+        continue;
+      }
+      sb.append(v).append(",").append(diff).append("\n");
     }
     return sb.toString();
   }

@@ -43,7 +43,7 @@ public class Main {
     histograms.add(new EquiWidthHistogram(min, max, 600, true));
     histograms.add(new EquiWidthHistogram(min, max, 200, true));
     histograms.add(new EquiWidthHistogram(min, max, 11, true));
-    //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
     EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
     histograms.add(e);
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));

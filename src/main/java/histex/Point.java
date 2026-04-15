@@ -12,6 +12,9 @@ public record Point(float x, float y) implements Comparable<Point> {
     StringBuilder sb = new StringBuilder();
     sb.append("x,y\n");
     for (Point p : points) {
+      if (Float.isNaN(p.x) || Float.isNaN(p.y)) {
+        continue;
+      }
       sb.append(p.x()).append(",").append(p.y()).append("\n");
     }
     return sb.toString();
