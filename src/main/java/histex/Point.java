@@ -1,8 +1,19 @@
 package histex;
 
+import java.util.List;
+
 public record Point(float x, float y) implements Comparable<Point> {
   @Override
   public int compareTo(Point o) {
     return Float.compare(this.x, o.x);
+  }
+
+  public static String toCsv(List<Point> points) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("x,y\n");
+    for (Point p : points) {
+      sb.append(p.x()).append(",").append(p.y()).append("\n");
+    }
+    return sb.toString();
   }
 }
