@@ -4,6 +4,7 @@ import histex.sketches.FixedBucketHistogram;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class GoldstandardRankEstimator implements RankEstimator {
@@ -65,29 +66,58 @@ public class GoldstandardRankEstimator implements RankEstimator {
 
   @Override
   public String debugAsCsv() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("x,y\n");
+    List<Point> points = getInterestingPoints();
+    System.out.println("interesting: " + points.size());
 
+    List<Point> sample = sampleEquiWidthAndNeighbors();
+    System.out.println("ewan: " + sample.size());
+    return Point.toCsv(points);
+  }
+
+  private List<Point> getInterestingPoints() {
+    List<Point> points = new ArrayList<>();
+    float v = values.get(0);
+    points.add(new Point(Math.nextDown(v), 0));
+
+    float maxDiff = (values.getLast()-v) / 200;
+    for (int i=1; i<values.size(); i++) {
+      if ((values.get(i)-v) > maxDiff) {
+        float last = values.get(i-1);
+        points.add(new Point(last, (float) getNormalizedRank(last)));
+
+        v = values.get(i);
+        if (Math.nextDown(v) > last) v = Math.nextDown(v);
+        points.add(new Point(v, (float) getNormalizedRank(v)));
+      }
+    }
+    v = values.getLast();
+    points.add(new Point(v, (float) getNormalizedRank(v)));
+    return points;
+  }
+
+
+
+  private List<Point> sampleEquiWidthAndNeighbors() {
+    List<Point> points = new ArrayList<>();
     float v = values.get(0);
     double rank = 0;
-    sb.append(v).append(",").append(0).append("\n");
-    int points = 3000;
-    for (int i=0; i< points; i++) {
-      int valueIndex = Math.clamp((long) i *values.size() / points, 0, values.size()-1);
+    points.add(new Point(v, 0));
+    int pointCount = 3000;
+    for (int i=0; i< pointCount; i++) {
+      int valueIndex = Math.clamp((long) i *values.size() / pointCount, 0, values.size()-1);
 
       v = Math.nextDown(values.get(valueIndex));
       rank = getNormalizedRank(v);
-      sb.append(v).append(",").append(rank).append("\n");
+      points.add(new Point(v, (float) rank));
 
       v = values.get(valueIndex);
       rank = getNormalizedRank(v);
-      sb.append(v).append(",").append(rank).append("\n");
+      points.add(new Point(v, (float) rank));
 
       v = Math.nextUp(values.get(valueIndex));
       rank = getNormalizedRank(v);
-      sb.append(v).append(",").append(rank).append("\n");
-
+      points.add(new Point(v, (float) rank));
     }
-    return sb.toString();
+    return points;
   }
 }

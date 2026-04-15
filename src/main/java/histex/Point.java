@@ -16,4 +16,11 @@ public record Point(float x, float y) implements Comparable<Point> {
     }
     return sb.toString();
   }
+
+  public static double angle(Point p1, Point p2) {
+    double dy = p2.y-p1.y;
+    double dx = p2.x-p1.x;
+
+    return Math.atan2(dy, dx);
+  }
 }
