@@ -17,8 +17,8 @@ public class ResultOutputCollector {
   private final Path path;
   private final OutputStream output;
 
-  public ResultOutputCollector() throws IOException {
-    String path = "draft-results/";
+  public ResultOutputCollector(String basePath) throws IOException {
+    String path = basePath;
     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
     String hash = ShellUtils.exec("git", "rev-parse", "--short", "HEAD").trim();
     String gitStatus = ShellUtils.exec("git", "status", "--porcelain");

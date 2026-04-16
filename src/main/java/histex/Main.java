@@ -7,18 +7,21 @@ import histex.sketches.TDigestHistogram;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-
-    ResultOutputCollector out = new ResultOutputCollector();
+    String basePath = "draft-results/";
+    ResultOutputCollector out = new ResultOutputCollector(basePath);
 
     Path.of("draft-results/latest").toFile().delete();
     ShellUtils.exec("ln", "-s", out.getPath().toAbsolutePath().toString(), "draft-results/latest");
@@ -111,6 +114,38 @@ public class Main {
 
       rangeWidth *= 2;
     }
+
+    Main.createLandingPage(basePath);
+  }
+
+  private static void createLandingPage(String basePath) throws IOException {
+    Path root = Paths.get(basePath);
+
+    // look for toc files
+    List<Path> tocFiles;
+    try (Stream<Path> walk = Files.walk(root)) {
+      tocFiles = walk.filter(Files::isRegularFile)
+          .filter(p -> p.getFileName().toString().startsWith("toc"))
+          .collect(Collectors.toCollection(ArrayList::new));
+    }
+    Collections.sort(tocFiles);
+
+    // generate html TOC of all diagrams
+    StringBuilder html = new StringBuilder();
+    html.append("<!-- file generated, do not edit manually! --><html><body>\n<h1>TOC Index</h1>\n<ul>\n");
+
+    for (Path file : tocFiles) {
+      // get path relative to base for clean links
+      String relativePath = root.relativize(file).toString().replace("\\", "/");
+      html.append("  <li><a href=\"viz.html?toc=")
+          .append(relativePath)
+          .append("\">")
+          .append(relativePath)
+          .append("</a></li>\n");
+    }
+
+    html.append("</ul>\n</body></html>");
+    Files.write(root.resolve("index.html"), html.toString().getBytes());
   }
 
   private static String fmt(double v) {
