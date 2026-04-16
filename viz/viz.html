@@ -24,12 +24,6 @@
         font-size: 1.2em;
     }
 
-    .clusters rect {
-        fill: #FFFFE0;
-        stroke: #999;
-        stroke-width: 1.5px;
-    }
-
     .container {
         overflow: hidden;
         width: 100%;
@@ -76,8 +70,6 @@
 
       // setup diagram
       const container = document.getElementById("chart");
-      const width = 1200; // container.clientWidth;
-      const height = 1000; // container.clientHeight;
 
       const svg = d3.select("svg")
         .attr("width", "100%")
@@ -87,6 +79,10 @@
 
       // rect to capture zoom events
       svg.append("rect").attr("fill", "none").attr("pointer-events", "all").attr("width", "100%").attr("height", "100%");
+      const rect = svg.node().getBoundingClientRect();
+      const margin = {top: 0, right: 0, bottom: 170, left: 50};
+      const width = rect.width - margin.left - margin.right;
+      const height = rect.height - margin.top - margin.bottom;
 
       const legendContainer = svg.append("g").attr("transform", "translate(250,0)");
 
@@ -130,7 +126,7 @@
           console.log("being nice ...");
           const xAxis = d3.axisBottom(xScale);
           const yAxis = d3.axisLeft(yScale);
-          const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", "translate(0, 680)").call(xAxis);
+          const gxAxis = svg.append("g").attr("class", "x-axis").attr("transform", `translate(0, ${height})`).call(xAxis);
           const gyAxis = svg.append("g").attr("class", "y-axis").call(yAxis);
 
           // legend
