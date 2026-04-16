@@ -45,7 +45,7 @@ public class TDigestHistogram implements Histogram {
   @Override
   public String debugAsCsv() {
     List<Point> points = HistSampling.localDynamic((float) tdigest.getMinValue(), (float) tdigest.getMaxValue(), 10, this);
-    return Point.toCsv(HistSampling.extractInterestingPoints(points));
+    return Point.toCsv(HistSampling.extractInterestingPoints(points, this));
   }
 
   public String getInfo() {

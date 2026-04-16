@@ -49,7 +49,7 @@ public class SplineSketchHistogram implements Histogram {
   @Override
   public String debugAsCsv() {
     List<Point> points = HistSampling.localDynamic(min, max, 12, this);
-    return Point.toCsv(points);
+    return Point.toCsv(HistSampling.extractInterestingPoints(points, this));
   }
 
 

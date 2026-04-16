@@ -7,6 +7,7 @@ import histex.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class CountHistogram implements Histogram {
 
@@ -108,24 +109,32 @@ public abstract class CountHistogram implements Histogram {
 
     if (!interpolate) {
       v = Math.nextUp(v);
-      points.add(new Point(v, 0));
+      addPoint(points, v);
     }
 
+    float lastBucketEnd = Float.MIN_VALUE;
     for(int i=0; i<count.length; i++) {
+      float bucketEnd = getBucketEnd(i);
+      if (lastBucketEnd == bucketEnd) {
+        // equi-height histograms may contain duplicate buckets
+        // TODO tr fix?
+        continue;
+      }
+      lastBucketEnd = bucketEnd;
       if (!interpolate) {
-        v = Math.nextDown(getBucketEnd(i));
+        v = Math.nextDown(bucketEnd);
         addPoint(points, v);
       }
 
-      v = getBucketEnd(i);
+      v = bucketEnd;
       addPoint(points, v);
 
       if (!interpolate) {
-        v = Math.nextUp(getBucketEnd(i));
+        v = Math.nextUp(bucketEnd);
         addPoint(points, v);
       }
     }
-    return Point.toCsv(HistSampling.extractInterestingPoints(points) );
+    return Point.toCsv(HistSampling.extractInterestingPoints(points, this));
   }
 
   private void addPoint(List<Point> points, float v) {
@@ -133,6 +142,10 @@ public abstract class CountHistogram implements Histogram {
     if (Double.isNaN(rank)) {
       return;
     }
-    points.add(new Point(v, (float) rank));
+    Point p = new Point(v, (float) rank);
+    if (!points.isEmpty() && Objects.equals(points.getLast(), p)) {
+      return;
+    }
+    points.add(p);
   }
 }

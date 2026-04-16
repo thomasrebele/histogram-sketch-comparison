@@ -24,9 +24,9 @@ public record Point(float x, float y) implements Comparable<Point> {
     return Math.hypot(p1.x-p2.x, p1.y-p2.y);
   }
 
-  public static double angle(Point p1, Point p2) {
+  public static double normangle(Point p1, Point p2, double width) {
     double dy = p2.y-p1.y;
-    double dx = p2.x-p1.x;
+    double dx = (p2.x-p1.x) / width;
 
     return Math.atan2(dy, dx);
   }

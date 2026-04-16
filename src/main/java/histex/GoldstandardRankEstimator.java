@@ -67,6 +67,7 @@ public class GoldstandardRankEstimator implements RankEstimator {
   @Override
   public String debugAsCsv() {
     List<Point> points = getInterestingPoints();
+    HistSampling.removeSuperfluousPoints(points, values.getLast()-values.getFirst());
     return Point.toCsv(points);
   }
 

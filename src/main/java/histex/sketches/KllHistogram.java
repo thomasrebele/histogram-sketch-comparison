@@ -70,6 +70,6 @@ public class KllHistogram implements Histogram {
       double normalizedRank = getNormalizedRank(v);
       points.add(new Point(v, (float) normalizedRank));
     }
-    return Point.toCsv(HistSampling.extractInterestingPoints(points));
+    return Point.toCsv(HistSampling.extractInterestingPoints(points, this));
   }
 }
