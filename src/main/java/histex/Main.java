@@ -236,7 +236,8 @@ public class Main {
     StringBuilder html = new StringBuilder();
     html.append("<!DOCTYPE html><!-- file generated, do not edit manually! --><html>");
     html.append("<style>a{text-decoration:none;}</style>");
-    html.append("<body>\n<h1>").append(context).append("</h1><h2>").append(root.relativize(base)).append("</h2>\n<ul>\n");
+    String headline = context == null ? "TOC" : context;
+    html.append("<body>\n<h1>").append(headline).append("</h1><h2>").append(root.relativize(base)).append("</h2>\n<ul>\n");
 
     for (TOCLink toc : tocs) {
       // get path relative to base for clean links
