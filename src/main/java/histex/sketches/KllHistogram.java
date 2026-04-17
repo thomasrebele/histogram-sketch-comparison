@@ -63,12 +63,17 @@ public class KllHistogram implements Histogram {
     List<Point> points = new ArrayList<>();
     for(int i=0; i<sv.getQuantiles().length; i++) {
       float v = sv.getQuantiles()[i];
-      if (!points.isEmpty() && points.getLast().x() == v) {
-        continue;
+
+      float prev = Math.nextDown(v);
+      if (points.isEmpty() || points.getLast().x() != prev) {
+        double normalizedRank = getNormalizedRank(prev);
+        points.add(new Point(prev, (float) normalizedRank));
       }
 
-      double normalizedRank = getNormalizedRank(v);
-      points.add(new Point(v, (float) normalizedRank));
+      if (points.isEmpty() || points.getLast().x() != v) {
+        double normalizedRank = getNormalizedRank(v);
+        points.add(new Point(v, (float) normalizedRank));
+      }
     }
     return Point.toCsv(HistSampling.extractInterestingPoints(points, this));
   }
