@@ -53,13 +53,15 @@ public class HistSampling {
     }
     Collections.sort(points);
 
-    List<Point> result = new ArrayList<>();
-    double epsilon = 0.01;
     double width = points.getLast().x()-points.getFirst().x();
-    extractInterestingPoints(points, epsilon, width, hist, result);
-    result.add(points.getLast());
 
-    removeSuperfluousPoints(result, width);
+    //List<Point> result = new ArrayList<>();
+    //double epsilon = 0.001;
+    //extractInterestingPoints(points, epsilon, width, hist, result);
+    //result.add(points.getLast());
+
+    List<Point> result = new ArrayList<>(points);
+    //removeSuperfluousPoints(result, width);
     return result;
   }
 
@@ -131,7 +133,7 @@ public class HistSampling {
       }
 
       // check if all angles are similar
-      double threshold = Math.PI * 2 / 360 * 10;
+      double threshold = Math.PI * 2 / 360 * 2;
       if (-angle1 < threshold && angle2 < threshold) {
         continue;
       }

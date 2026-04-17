@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static histex.HistSampling.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HistSamplingTest {
@@ -28,7 +29,7 @@ public class HistSamplingTest {
     Point p7 = new Point(3004f, 0.30f);
     points.add(p7);
 
-    HistSampling.removeSuperfluousPoints(points, width);
+    removeSuperfluousPoints(points, width);
 
     assertEquals(points, List.of(p0, p2, p3, p5, p6, p7));
   }
@@ -52,7 +53,7 @@ public class HistSamplingTest {
     Point p7 = new Point(3004f, 0.30f);
     points.add(p7);
 
-    HistSampling.removeSuperfluousPoints(points, width);
+    removeSuperfluousPoints(points, width);
 
     assertEquals(points, List.of(p0, p2, p3, p5, p6, p7));
   }
