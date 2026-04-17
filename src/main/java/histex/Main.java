@@ -22,6 +22,69 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+
+  static List<String> TPCDS_DUMPS = Arrays.asList(
+      "sf100000/item.i_brand_id.zstd",
+      "sf100000/item.i_category_id.zstd",
+      "sf100000/item.i_class_id.zstd",
+      "sf100000/item.i_current_price.zstd",
+      "sf100000/item.i_item_sk.zstd",
+      "sf100000/item.i_manager_id.zstd",
+      "sf100000/item.i_manufact_id.zstd",
+      "sf100000/item.i_rec_end_date.zstd",
+      "sf100000/item.i_rec_start_date.zstd",
+      "sf100000/item.i_wholesale_cost.zstd",
+      "sf100000/store.s_number_employees.zstd",
+      "sf100000/web_page.wp_char_count.zstd",
+      "sf100/customer_address.ca_zip.zstd",
+      "sf10/catalog_returns.cr_return_amount.zstd",
+      "sf10/store_returns.sr_return_amt.zstd",
+      "sf10/store_sales.ss_store_sk.zstd",
+      "sf10/store_sales.ss_ticket_number.zstd",
+      "sf10/web_returns.wr_return_amt.zstd",
+      "sf10/web_sales.ws_quantity.zstd",
+      "sf1/catalog_sales.cs_net_paid.zstd",
+      "sf1/catalog_sales.cs_net_profit.zstd",
+      "sf1/catalog_sales.cs_quantity.zstd",
+      "sf1/inventory.inv_quantity_on_hand.zstd",
+      "sf1/store_sales.ss_addr_sk.zstd",
+      "sf1/store_sales.ss_cdemo_sk.zstd",
+      "sf1/store_sales.ss_coupon_amt.zstd",
+      "sf1/store_sales.ss_customer_sk.zstd",
+      "sf1/store_sales.ss_ext_discount_amt.zstd",
+      "sf1/store_sales.ss_ext_list_price.zstd",
+      "sf1/store_sales.ss_ext_sales_price.zstd",
+      "sf1/store_sales.ss_ext_tax.zstd",
+      "sf1/store_sales.ss_ext_wholesale_cost.zstd",
+      "sf1/store_sales.ss_hdemo_sk.zstd",
+      "sf1/store_sales.ss_item_sk.zstd",
+      "sf1/store_sales.ss_list_price.zstd",
+      "sf1/store_sales.ss_net_paid_inc_tax.zstd",
+      "sf1/store_sales.ss_net_paid.zstd",
+      "sf1/store_sales.ss_net_profit.zstd",
+      "sf1/store_sales.ss_promo_sk.zstd",
+      "sf1/store_sales.ss_quantity.zstd",
+      "sf1/store_sales.ss_sales_price.zstd",
+      "sf1/store_sales.ss_sold_time_sk.zstd",
+      "sf1/store_sales.ss_wholesale_cost.zstd",
+      "sf1/web_sales.ws_net_paid.zstd",
+      "sf1/web_sales.ws_net_profit.zstd",
+      "tiny/date_dim.d_date.zstd",
+      "tiny/date_dim.d_dom.zstd",
+      "tiny/date_dim.d_month_seq.zstd",
+      "tiny/date_dim.d_moy.zstd",
+      "tiny/date_dim.d_qoy.zstd",
+      "tiny/date_dim.d_year.zstd",
+      "tiny/household_demographics.hd_vehicle_count.zstd",
+      "tiny/income_band.ib_lower_bound.zstd",
+      "tiny/income_band.ib_upper_bound.zstd",
+      "tiny/time_dim.t_hour.zstd",
+      "tiny/time_dim.t_minute.zstd",
+      "tiny/time_dim.t_time.zstd"
+  );
+
+  private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
+
   public static void main(String[] args) throws IOException {
     String rootPath = "draft-results/";
 
