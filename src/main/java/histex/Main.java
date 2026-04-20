@@ -4,7 +4,6 @@ import histex.sketches.EquiWidthHistogram;
 import histex.sketches.KllHistogram;
 import histex.sketches.SplineSketchHistogram;
 import histex.sketches.TDigestHistogram;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,29 +27,29 @@ import static java.util.Map.entry;
 public class Main {
 
   static List<String> TPCDS_DUMPS = Arrays.asList(
-//      "sf100000/item.i_brand_id.zstd",
-//      "sf100000/item.i_category_id.zstd",
-//      "sf100000/item.i_class_id.zstd",
-//      "sf100000/item.i_current_price.zstd",
-//      "sf100000/item.i_item_sk.zstd",
-//      "sf100000/item.i_manager_id.zstd",
-//      "sf100000/item.i_manufact_id.zstd",
-//      "sf100000/item.i_rec_end_date.zstd",
-//      "sf100000/item.i_rec_start_date.zstd",
-//      "sf100000/item.i_wholesale_cost.zstd",
-//      "sf100000/store.s_number_employees.zstd",
-//      "sf100000/web_page.wp_char_count.zstd",
-//      "sf100/customer_address.ca_zip.zstd",
-//      "sf10/catalog_returns.cr_return_amount.zstd",
-//      "sf10/store_returns.sr_return_amt.zstd",
-//      "sf10/store_sales.ss_store_sk.zstd",
-//      "sf10/store_sales.ss_ticket_number.zstd",
-//      "sf10/web_returns.wr_return_amt.zstd",
-//      "sf10/web_sales.ws_quantity.zstd",
-//      "sf1/catalog_sales.cs_net_paid.zstd",
-//      "sf1/catalog_sales.cs_net_profit.zstd",
-//      "sf1/catalog_sales.cs_quantity.zstd",
-//      "sf1/inventory.inv_quantity_on_hand.zstd",
+      "sf100000/item.i_brand_id.zstd",
+      "sf100000/item.i_category_id.zstd",
+      "sf100000/item.i_class_id.zstd",
+      "sf100000/item.i_current_price.zstd",
+      "sf100000/item.i_item_sk.zstd",
+      "sf100000/item.i_manager_id.zstd",
+      "sf100000/item.i_manufact_id.zstd",
+      "sf100000/item.i_rec_end_date.zstd",
+      "sf100000/item.i_rec_start_date.zstd",
+      "sf100000/item.i_wholesale_cost.zstd",
+      "sf100000/store.s_number_employees.zstd",
+      "sf100000/web_page.wp_char_count.zstd",
+      "sf100/customer_address.ca_zip.zstd",
+      "sf10/catalog_returns.cr_return_amount.zstd",
+      "sf10/store_returns.sr_return_amt.zstd",
+      "sf10/store_sales.ss_store_sk.zstd",
+      "sf10/store_sales.ss_ticket_number.zstd",
+      "sf10/web_returns.wr_return_amt.zstd",
+      "sf10/web_sales.ws_quantity.zstd",
+      "sf1/catalog_sales.cs_net_paid.zstd",
+      "sf1/catalog_sales.cs_net_profit.zstd",
+      "sf1/catalog_sales.cs_quantity.zstd",
+      "sf1/inventory.inv_quantity_on_hand.zstd",
       "sf1/store_sales.ss_addr_sk.zstd",
       "sf1/store_sales.ss_cdemo_sk.zstd",
       "sf1/store_sales.ss_coupon_amt.zstd",
@@ -88,6 +87,44 @@ public class Main {
   );
 
   private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
+
+  private static List<Histogram> createHistogramList(ExperimentRunner.MapArgument map) {
+    var ds = (Dataset) map.get("dataset");
+    var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+    float min = goldstandard.getMin();
+    float max = goldstandard.getMax();
+
+    List<Histogram> histograms = new ArrayList<>();
+    histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+    histograms.add(new EquiWidthHistogram(min, max, 600, true));
+    histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    histograms.add(new EquiWidthHistogram(min, max, 11, true));
+    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+    EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
+    histograms.add(e);
+    histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+    histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
+
+    histograms.add(new KllHistogram());
+    histograms.add(new SplineSketchHistogram(200));
+    histograms.add(new TDigestHistogram());
+
+    for (Histogram h : histograms) {
+      h.consume(ds.data().get());
+    }
+    return histograms;
+  }
+
+  private static List<RankEstimator> createRankEstimatorList(ExperimentRunner.MapArgument map) {
+    List<RankEstimator> estimators = new ArrayList<>();
+    estimators.addAll(createHistogramList(map));
+
+    var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+    estimators.add(goldstandard);
+
+    return estimators;
+  }
+
 
   private static record Dataset(String desc, Supplier<FloatIterator> data) {
     @Override
@@ -136,32 +173,8 @@ public class Main {
       }
       return List.of(gs);
     }).dependsOn("dataset");
-    er.factor("histogram", map -> {
-      var ds = (Dataset) map.get("dataset");
-      var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
-      float min = goldstandard.getMin();
-      float max = goldstandard.getMax();
-
-      List<Histogram> histograms = new ArrayList<>();
-      histograms.add(new EquiWidthHistogram(min, max, 1200, true));
-      histograms.add(new EquiWidthHistogram(min, max, 600, true));
-      histograms.add(new EquiWidthHistogram(min, max, 200, true));
-      histograms.add(new EquiWidthHistogram(min, max, 11, true));
-      histograms.add(new EquiWidthHistogram(min, max, 1200, false));
-      EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
-      histograms.add(e);
-      histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
-      histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
-
-      histograms.add(new KllHistogram());
-      histograms.add(new SplineSketchHistogram(200));
-      histograms.add(new TDigestHistogram());
-
-      for (Histogram h : histograms) {
-        h.consume(ds.data().get());
-      }
-      return histograms;
-    }).dependsOn("goldstandard");
+    er.factor("histogram", Main::createHistogramList).dependsOn("goldstandard");
+    er.factor("rankEstimator", Main::createRankEstimatorList).dependsOn("goldstandard");
 
     er.factor("rangeWidth", map -> {
       var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
@@ -181,7 +194,7 @@ public class Main {
 
 
     // create visualizations
-    er.prepare().factors(List.of("dataset", "goldstandard", "histogram")).call(map -> {
+    er.prepare().factors(List.of("dataset", "goldstandard", "rankEstimator")).call(map -> {
       try {
         var ds = (Dataset)map.get("dataset");
         var myout = out.sub(ds.desc.replace("/", "_"));
@@ -189,7 +202,7 @@ public class Main {
 
         // visualizations
         String vizDir = "viz/";
-        var candidate = (RankEstimator) map.get("histogram");
+        var candidate = (RankEstimator) map.get("rankEstimator");
 
         String tocEntry = null;
         String tocDiffEntry = null;
@@ -208,7 +221,7 @@ public class Main {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(entry("histogram", (ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
+    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(entry("rankEstimator", (ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
       var ds = (Dataset)map.get("dataset");
       try {
         var myout = out.sub(ds.desc.replace("/", "_"));
@@ -230,13 +243,13 @@ public class Main {
 
         myout.fileAppend(vizDir + "/toc.csv", toc.toString());
         myout.fileAppend(vizDir + "/toc-diff.csv", tocDiff.toString());
-        Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
       return map;
     }))).run();
 
+    Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
 
     //er.call(List.of("dataset", "goldstandard", "histogram", "rangeWidth"), map -> {
 
