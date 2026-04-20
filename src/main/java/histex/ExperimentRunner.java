@@ -34,28 +34,31 @@ import histex.ExperimentRunner.Argument;
  *
  * @author Thomas Rebele
  */
-public class ExperimentRunner<T extends Argument<T>> {
+public class ExperimentRunner<ArgT extends Argument<ArgT>> {
 
   /** One executor service for every level */
   public List<ExecutorService> executorStack = new ArrayList<>();
 
-  public static interface Argument<T> {
+  public static interface Argument<ArgT> {
+    ArgT copy() throws CloneNotSupportedException;
+  }
 
-    T copy() throws CloneNotSupportedException;
+  interface Key<ValT> {
+
   }
 
   /** Represents the arguments for an iteration of a factor */
   public static class MapArgument implements Argument<MapArgument>, Cloneable {
 
-    Map<String, Object> map = new HashMap<>();
+    Map<Key<?>, Object> map = new HashMap<>();
 
-    Map<String, Integer> indexMap = new HashMap<>();
+    Map<Key<?>, Integer> indexMap = new HashMap<>();
 
-    public Object get(String key) {
-      return map.get(key);
+    public <ValT> ValT get(Key<ValT> key) {
+      return (ValT) map.get(key);
     }
 
-    public Set<String> keySet() {
+    public Set<Key<?>> keySet() {
       return map.keySet();
     }
 
@@ -67,13 +70,19 @@ public class ExperimentRunner<T extends Argument<T>> {
       return arg;
     }
 
-    public MapArgument put(String name, Object o, int index) {
+    public <KeyT> MapArgument put(Key<KeyT> name, KeyT o, int index) {
       map.put(name, o);
       indexMap.put(name, index);
       return this;
     }
 
-    public boolean containsKey(String key) {
+    private <KeyT> MapArgument putRaw(Key<KeyT> name, Object o, int index) {
+      map.put(name, o);
+      indexMap.put(name, index);
+      return this;
+    }
+
+    public boolean containsKey(Key<?> key) {
       return map.containsKey(key);
     }
 
@@ -90,12 +99,12 @@ public class ExperimentRunner<T extends Argument<T>> {
       return map.toString() + " indices " + indexMap;
     }
 
-    public MapArgument with(String key, Object val) {
+    public <KeyT> MapArgument with(Key<KeyT> key, KeyT val) {
       this.map.put(key, val);
       return this;
     }
 
-    public MapArgument copyWith(String key, List<String> words) {
+    public MapArgument copyWith(Key<?> key, List<String> words) {
       MapArgument ma = new MapArgument();
       ma.indexMap = new HashMap<>(indexMap);
       ma.map = new HashMap<>(map);
@@ -105,24 +114,23 @@ public class ExperimentRunner<T extends Argument<T>> {
   }
 
   /** Represents a for loop */
-  public static class Factor<T> {
+  public static class Factor<ArgT, ValT> {
 
-    String name;
+    Key<ValT> name;
 
     Iterable<Object> valueList;
 
     List<String> dependencies = new ArrayList<>();
 
-    public interface Setter<T> {
-
-      public void set(T arg, String attributeName, Object value, int idx);
+    public interface Setter<T, ValT> {
+      public void set(T arg, Key<ValT> attributeName, Object value, int idx);
     }
 
-    Setter<T> setter = null;
+    Setter<ArgT, ValT> setter = null;
 
-    BiFunction<T, List<T>, T> aggregator = null;
+    BiFunction<ArgT, List<ArgT>, ArgT> aggregator = null;
 
-    public Function<T, Iterable<? extends Object>> lambda;
+    public Function<ArgT, Iterable<? extends ValT>> lambda;
 
     private boolean parallelizable = true;
 
@@ -142,12 +150,12 @@ public class ExperimentRunner<T extends Argument<T>> {
     }
 
     @SuppressWarnings("unchecked")
-    public <V> Factor<T> setter(BiConsumer<T, V> consumer) {
+    public <V> Factor<ArgT, ValT> setter(BiConsumer<ArgT, V> consumer) {
       setter = (arg, attrib, value, idx) -> consumer.accept(arg, (V) value);
       return this;
     }
 
-    public Iterable<? extends Object> values(T map) {
+    public Iterable<? extends Object> values(ArgT map) {
       if (valueList != null) {
         return valueList;
       }
@@ -155,19 +163,19 @@ public class ExperimentRunner<T extends Argument<T>> {
       return lambda.apply(map);
     }
 
-    public Factor<T> aggregate(BiFunction<T, List<T>, T> aggregator) {
+    public Factor<ArgT, ValT> aggregate(BiFunction<ArgT, List<ArgT>, ArgT> aggregator) {
       this.aggregator = aggregator;
       return this;
     }
 
-    public Factor<T> parallelizable(boolean b) {
+    public Factor<ArgT, ValT> parallelizable(boolean b) {
       this.parallelizable = b;
       return this;
     }
 
-    private void set(T argCopy, Object o, int idx) {
+    private void set(ArgT argCopy, Object o, int idx) {
       if (setter == null && argCopy instanceof MapArgument) {
-        ((MapArgument) argCopy).put(name, o, idx);
+        ((MapArgument) argCopy).putRaw(name, o, idx);
       } else {
         setter.set(argCopy, name, o, idx);
       }
@@ -175,10 +183,10 @@ public class ExperimentRunner<T extends Argument<T>> {
   }
 
   /** Map from name of a factor to the factor itself */
-  Map<String, Factor<T>> factors = new HashMap<>();
+  Map<Key<?>, Factor<ArgT, ?>> factors = new HashMap<>();
 
   /** Factor names as they were added */
-  List<String> defaultFactors = new ArrayList<>();
+  List<Key<?>> defaultFactors = new ArrayList<>();
 
   /*public ExperimentRunner<T> copy() {
     ExperimentRunner<T> er = new ExperimentRunner<T>();
@@ -191,9 +199,19 @@ public class ExperimentRunner<T extends Argument<T>> {
   }*/
 
   /** Create a new factor */
-  public Factor<T> factor(String name) {
-    return factors.computeIfAbsent(name, n -> {
-      Factor<T> f = new Factor<T>();
+  public <ValT> Factor<ArgT, ValT> factor(Key<ValT> name) {
+    return (Factor<ArgT, ValT>) factors.computeIfAbsent(name, n -> {
+      Factor<ArgT, ValT> f = new Factor<ArgT, ValT>();
+      f.name = name;
+      defaultFactors.add(name);
+      return f;
+    });
+  }
+
+  /** Create a new factor */
+  public <ValT> Factor<ArgT, ValT> factor(Class<Key<ValT>> name) {
+    return (Factor<ArgT, ValT>) factors.computeIfAbsent(name, n -> {
+      Factor<ArgT, ValT> f = new Factor<ArgT, ValT>();
       f.name = name;
       defaultFactors.add(name);
       return f;
@@ -202,22 +220,28 @@ public class ExperimentRunner<T extends Argument<T>> {
 
   @SuppressWarnings("unchecked")
   /** Create a new factor for the values */
-  public <V> Factor<T> factor(String name, Iterable<V> values) {
-    Factor<T> f = factor(name);
+  public <ValT> Factor<ArgT, ValT> factor(Key<ValT> name, Iterable<? extends ValT> values) {
+    Factor<ArgT, ValT> f = factor(name);
+    f.valueList = (Iterable<Object>) values;
+    return f;
+  }
+
+  public <ValT> Factor<ArgT, ValT> factor(Class<Key<ValT>> name, Iterable<? extends ValT> values) {
+    Factor<ArgT, ValT> f = factor(name);
     f.valueList = (Iterable<Object>) values;
     return f;
   }
 
   /** Create a dynamic factor. It iterates over the result of the lambda function */
-  public Factor<T> factor(String name, Function<T, Iterable<? extends Object>> lambda) {
-    Factor<T> f = factor(name);
+  public <ValT> Factor<ArgT, ValT> factor(Key<ValT> name, Function<ArgT, Iterable<? extends ValT>> lambda) {
+    Factor<ArgT, ValT> f = factor(name);
     f.lambda = lambda;
     return f;
   }
 
   /** see other call function
    * @throws CloneNotSupportedException */
-  public void call(List<String> factors, Consumer<T> lambda, T init) throws CloneNotSupportedException {
+  public void call(List<Key<?>> factors, Consumer<ArgT> lambda, ArgT init) throws CloneNotSupportedException {
     call(factors, map -> {
       lambda.accept(map);
       return null;
@@ -229,15 +253,15 @@ public class ExperimentRunner<T extends Argument<T>> {
    * @return
    * @throws CloneNotSupportedException
    */
-  public List<T> call(List<String> factors, Function<T, T> lambda, T init) throws CloneNotSupportedException {
-    List<T> result = new ArrayList<>();
+  public List<ArgT> call(List<Key<?>> factors, Function<ArgT, ArgT> lambda, ArgT init) throws CloneNotSupportedException {
+    List<ArgT> result = new ArrayList<>();
     runRec(lambda, init, new ArrayList<>(), factors, result, 0);
     return result;
   }
 
   /** see other call function
    * @throws CloneNotSupportedException */
-  public void call(Consumer<T> lambda, T init) throws CloneNotSupportedException {
+  public void call(Consumer<ArgT> lambda, ArgT init) throws CloneNotSupportedException {
     call(defaultFactors, map -> {
       lambda.accept(map);
       return null;
@@ -247,7 +271,7 @@ public class ExperimentRunner<T extends Argument<T>> {
   /**
    * @throws CloneNotSupportedException
    */
-  public List<T> call(Function<T, T> lambda, T init) throws CloneNotSupportedException {
+  public List<ArgT> call(Function<ArgT, ArgT> lambda, ArgT init) throws CloneNotSupportedException {
     return call(defaultFactors, lambda, init);
   }
 
@@ -260,7 +284,7 @@ public class ExperimentRunner<T extends Argument<T>> {
    * @param result
    * @throws CloneNotSupportedException
    */
-  private void runRec(Function<T, T> finalLambda, T map, List<String> doneFactors, List<String> remainingFactors, List<T> result, int depth)
+  private void runRec(Function<ArgT, ArgT> finalLambda, ArgT map, List<Key<?>> doneFactors, List<Key<?>> remainingFactors, List<ArgT> result, int depth)
       throws CloneNotSupportedException {
     // after last factor: call lambdas
     if (remainingFactors.size() == 0) {
@@ -275,7 +299,7 @@ public class ExperimentRunner<T extends Argument<T>> {
     }
 
     // get next factor
-    Factor<T> f = factors.get(remainingFactors.get(0));
+    Factor<ArgT, ?> f = factors.get(remainingFactors.get(0));
     for(String dep : f.dependencies) {
       if (!doneFactors.contains(dep)) {
         System.out.println("dependency for " + f.name + " not fulfilled: misses " + dep);
@@ -283,18 +307,18 @@ public class ExperimentRunner<T extends Argument<T>> {
     }
     // iterate over its values
     Iterable<? extends Object> it = f.values(map);
-    List<T> loopResult = new ArrayList<>();
+    List<ArgT> loopResult = new ArrayList<>();
     if (it != null) {
       // create a list of tasks, which run recursively
-      List<Callable<List<T>>> outerTasks = new ArrayList<>();
+      List<Callable<List<ArgT>>> outerTasks = new ArrayList<>();
       int idx = 0;
       for (Object o : it) {
-        T argCopy = map.copy();
+        ArgT argCopy = map.copy();
         f.set(argCopy, o, idx++);
 
         outerTasks.add(() -> {
-          List<T> recursiveResult = new ArrayList<>();
-          List<String> newDoneFactors = new ArrayList<>(doneFactors);
+          List<ArgT> recursiveResult = new ArrayList<>();
+          List<Key<?>> newDoneFactors = new ArrayList<>(doneFactors);
           newDoneFactors.add(remainingFactors.get(0));
           runRec(finalLambda, argCopy, newDoneFactors, remainingFactors.subList(1, remainingFactors.size()), recursiveResult, depth + 1);
           return recursiveResult;
@@ -307,9 +331,9 @@ public class ExperimentRunner<T extends Argument<T>> {
         }
         ExecutorService executorService = executorStack.get(depth);
         try {
-          for (Future<List<T>> future : executorService.invokeAll(outerTasks)) {
+          for (Future<List<ArgT>> future : executorService.invokeAll(outerTasks)) {
             try {
-              List<T> tmpResult = future.get();
+              List<ArgT> tmpResult = future.get();
               if (tmpResult != null) {
                 loopResult.addAll(tmpResult);
               }
@@ -324,7 +348,7 @@ public class ExperimentRunner<T extends Argument<T>> {
         // serial execution
         outerTasks.forEach(c -> {
           try {
-            List<T> tmpResult = c.call();
+            List<ArgT> tmpResult = c.call();
             if (tmpResult != null) {
               loopResult.addAll(tmpResult);
             }
@@ -337,7 +361,7 @@ public class ExperimentRunner<T extends Argument<T>> {
     // deal with result
     if (f.aggregator != null) {
       // run aggregator
-      T tmpResult = f.aggregator.apply(map, loopResult);
+      ArgT tmpResult = f.aggregator.apply(map, loopResult);
       if (tmpResult != null) {
         result.add(tmpResult);
       }
@@ -352,7 +376,7 @@ public class ExperimentRunner<T extends Argument<T>> {
     return Executors.newWorkStealingPool(numProcessors);
   }
 
-  public List<String> until(String factor) {
+  public List<Key<?>> until(String factor) {
     int idx = defaultFactors.indexOf(factor);
     if (idx < 0) {
       return Arrays.asList();
@@ -360,10 +384,10 @@ public class ExperimentRunner<T extends Argument<T>> {
     return defaultFactors.subList(0, idx + 1);
   }
 
-  public Iterable<T> iterate(String factor, T map) throws CloneNotSupportedException {
-    List<T> result = new ArrayList<>();
+  public Iterable<ArgT> iterate(String factor, ArgT map) throws CloneNotSupportedException {
+    List<ArgT> result = new ArrayList<>();
     int idx = 0;
-    Factor<T> f = factors.get(factor);
+    Factor<ArgT, ?> f = factors.get(factor);
     Iterable<? extends Object> it = f.values(map);
     if (it == null) {
       throw new NullPointerException("factor " + factor + " returned null for map " + map);
@@ -376,6 +400,19 @@ public class ExperimentRunner<T extends Argument<T>> {
     return result;
   }
 
+  public record UntypedKey(String name) implements Key<Object> {
+    @Override
+    public String toString() {
+      return name;
+    }
+  }
+
+  public static UntypedKey key(String name) {
+    return new UntypedKey(name);
+  }
+
+  static class run implements Key<Integer>{}
+
   /**
    * Example
    * @param args
@@ -386,28 +423,33 @@ public class ExperimentRunner<T extends Argument<T>> {
     List<String> functions = Arrays.asList("cost1", "cost2");
     List<String> whatever = Arrays.asList("x1", "x2");
 
-    ExperimentRunner<MapArgument> e = new ExperimentRunner<>();
-    e.factor("dataset", datasets);
-    e.factor("cost-function", functions);
-    e.factor("whatever", whatever);
 
-    e.factor("dependent", map -> {
+    ExperimentRunner<MapArgument> e = new ExperimentRunner<>();
+    UntypedKey dataset = key("dataset");
+    UntypedKey costFunction = key("cost-function");
+    UntypedKey whateverKey = key("whatever");
+    e.factor(dataset, datasets);
+    e.factor(costFunction, functions);
+    e.factor(whateverKey, whatever);
+    e.factor((Key<Integer>)run.class, (List<Integer>) List.of(1,2,3));
+
+    e.factor(key("dependent"), map -> {
       List<String> values = new ArrayList<>();
       for (String s : Arrays.asList("dep1", "dep2")) {
-        values.add(map.get("dataset") + s);
+        values.add(map.get(dataset) + s);
       }
-      return (Iterable<? extends Object>) values;
+      return values;
     }).dependsOn("dataset");
 
-    for (MapArgument x : e.call(Arrays.asList("dataset", "cost-function", "dependent"), map -> {
-      System.out.println(map);
-      return map.with("x", "abc");
+    for (MapArgument x : e.call(Arrays.asList(dataset, costFunction, key("dependent")), map -> {
+      System.out.println("lambda: " + map);
+      return map.with(key("x"), "abc");
     } , new MapArgument())) {
-      System.out.println(x);
+      System.out.println("for: " + x);
     }
 
-    e.call(Arrays.asList("cost-function", "dataset", "whatever"), map -> {
-      System.out.println(map);
+    e.call(Arrays.asList(costFunction, dataset, whateverKey), map -> {
+      System.out.println("lambda: " + map);
     } , new MapArgument());
   }
 
