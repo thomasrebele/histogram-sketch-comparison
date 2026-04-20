@@ -3,11 +3,12 @@ package histex;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Scanner;
 import java.util.function.Supplier;
 
 public class FloatIteratorFactory {
@@ -29,25 +30,44 @@ public class FloatIteratorFactory {
     public FloatIterator get() {
       try {
         InputStream fin = Files.newInputStream(Paths.get(path));
-        BufferedInputStream in = new BufferedInputStream(fin);
+        BufferedInputStream in = new BufferedInputStream(fin, 1<<16);
         ZstdCompressorInputStream zsIn = new ZstdCompressorInputStream(in);
-        BufferedInputStream bf = new BufferedInputStream(zsIn);
-        Scanner r = new Scanner(bf);
-
+        BufferedInputStream bf = new BufferedInputStream(zsIn, 1<<16);
+        BufferedReader r = new BufferedReader(new InputStreamReader(bf));
 
         return new FloatIterator() {
+          private String nextLine = null;
+
           int i=0;
           @Override
           public float nextValue() {
             i+=1;
-            return r.nextFloat();
+            advance();
+
+
+            float result = Float.parseFloat(nextLine);
+            nextLine = null;
+            return result;
           }
 
           @Override
           public boolean hasNext() {
-            System.out.println("warning: read only the first 100 entries");
-            if (i>100) return false; // TODO tr remove
-            return r.hasNext() && r.hasNextFloat();
+            advance();
+            if ("#done".equals(nextLine)) {
+              return false;
+            }
+
+            return nextLine != null;
+          }
+
+          private void advance() {
+            if (nextLine == null) {
+              try {
+                nextLine = r.readLine();
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            }
           }
 
           @Override
