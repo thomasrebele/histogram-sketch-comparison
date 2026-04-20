@@ -120,4 +120,8 @@ public class GoldstandardRankEstimator implements RankEstimator {
     }
     return points;
   }
+
+  public int size() {
+    return this.values.size();
+  }
 }

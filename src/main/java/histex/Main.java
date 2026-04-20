@@ -4,6 +4,7 @@ import histex.sketches.EquiWidthHistogram;
 import histex.sketches.KllHistogram;
 import histex.sketches.SplineSketchHistogram;
 import histex.sketches.TDigestHistogram;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,38 +16,41 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Map.entry;
+
 public class Main {
 
   static List<String> TPCDS_DUMPS = Arrays.asList(
-      "sf100000/item.i_brand_id.zstd",
-      "sf100000/item.i_category_id.zstd",
-      "sf100000/item.i_class_id.zstd",
-      "sf100000/item.i_current_price.zstd",
-      "sf100000/item.i_item_sk.zstd",
-      "sf100000/item.i_manager_id.zstd",
-      "sf100000/item.i_manufact_id.zstd",
-      "sf100000/item.i_rec_end_date.zstd",
-      "sf100000/item.i_rec_start_date.zstd",
-      "sf100000/item.i_wholesale_cost.zstd",
-      "sf100000/store.s_number_employees.zstd",
-      "sf100000/web_page.wp_char_count.zstd",
-      "sf100/customer_address.ca_zip.zstd",
-      "sf10/catalog_returns.cr_return_amount.zstd",
-      "sf10/store_returns.sr_return_amt.zstd",
-      "sf10/store_sales.ss_store_sk.zstd",
-      "sf10/store_sales.ss_ticket_number.zstd",
-      "sf10/web_returns.wr_return_amt.zstd",
-      "sf10/web_sales.ws_quantity.zstd",
-      "sf1/catalog_sales.cs_net_paid.zstd",
-      "sf1/catalog_sales.cs_net_profit.zstd",
-      "sf1/catalog_sales.cs_quantity.zstd",
-      "sf1/inventory.inv_quantity_on_hand.zstd",
+//      "sf100000/item.i_brand_id.zstd",
+//      "sf100000/item.i_category_id.zstd",
+//      "sf100000/item.i_class_id.zstd",
+//      "sf100000/item.i_current_price.zstd",
+//      "sf100000/item.i_item_sk.zstd",
+//      "sf100000/item.i_manager_id.zstd",
+//      "sf100000/item.i_manufact_id.zstd",
+//      "sf100000/item.i_rec_end_date.zstd",
+//      "sf100000/item.i_rec_start_date.zstd",
+//      "sf100000/item.i_wholesale_cost.zstd",
+//      "sf100000/store.s_number_employees.zstd",
+//      "sf100000/web_page.wp_char_count.zstd",
+//      "sf100/customer_address.ca_zip.zstd",
+//      "sf10/catalog_returns.cr_return_amount.zstd",
+//      "sf10/store_returns.sr_return_amt.zstd",
+//      "sf10/store_sales.ss_store_sk.zstd",
+//      "sf10/store_sales.ss_ticket_number.zstd",
+//      "sf10/web_returns.wr_return_amt.zstd",
+//      "sf10/web_sales.ws_quantity.zstd",
+//      "sf1/catalog_sales.cs_net_paid.zstd",
+//      "sf1/catalog_sales.cs_net_profit.zstd",
+//      "sf1/catalog_sales.cs_quantity.zstd",
+//      "sf1/inventory.inv_quantity_on_hand.zstd",
       "sf1/store_sales.ss_addr_sk.zstd",
       "sf1/store_sales.ss_cdemo_sk.zstd",
       "sf1/store_sales.ss_coupon_amt.zstd",
@@ -85,7 +89,14 @@ public class Main {
 
   private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
 
-  public static void main(String[] args) throws IOException {
+  private static record Dataset(String desc, Supplier<FloatIterator> data) {
+    @Override
+    public String toString() {
+      return desc;
+    }
+  }
+
+  public static void main(String[] args) throws IOException, CloneNotSupportedException {
     String rootPath = "draft-results/";
 
     //if (true) {
@@ -93,12 +104,11 @@ public class Main {
     //  return;
     //}
 
-    ResultOutputCollector out = new ResultOutputCollector(rootPath);
+    ResultOutputCollector out = ResultOutputCollector.of(rootPath);
     StringBuilder sbDescription = new StringBuilder();
 
     Path.of("draft-results/latest").toFile().delete();
     ShellUtils.exec("ln", "-s", out.getPath().toAbsolutePath().toString(), "draft-results/latest");
-
 
     final long seed = new Random(System.nanoTime()).nextLong();
     out.println("seed: " + seed);
@@ -109,6 +119,135 @@ public class Main {
         //loadTpcdsColumn("src/main/resources/tpcds-column-dumps/sf100/item.i_current_price.zstd", sbDescription)
         loadTpcdsColumn("src/main/resources/tpcds-column-dumps/sf100/item.i_wholesale_cost.zstd", sbDescription)
         ;
+
+    ExperimentRunner<ExperimentRunner.MapArgument> er = new ExperimentRunner<>();
+
+    List<Dataset> datasets = TPCDS_DUMPS.stream().map(Main::loadTpcdsColumn).toList();
+
+    out.fileAppend("desc.txt", datasets.size() + "_datasets");
+
+    er.factor("dataset", datasets);
+    er.factor("goldstandard", map -> {
+      var ds = (Dataset) map.get("dataset");
+      var gs = new GoldstandardRankEstimator(ds.data());
+      if (gs.size() == 0) {
+        System.out.println("could not load " + ds.desc);
+        return List.of();
+      }
+      return List.of(gs);
+    }).dependsOn("dataset");
+    er.factor("histogram", map -> {
+      var ds = (Dataset) map.get("dataset");
+      var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+      float min = goldstandard.getMin();
+      float max = goldstandard.getMax();
+
+      List<Histogram> histograms = new ArrayList<>();
+      histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+      histograms.add(new EquiWidthHistogram(min, max, 600, true));
+      histograms.add(new EquiWidthHistogram(min, max, 200, true));
+      histograms.add(new EquiWidthHistogram(min, max, 11, true));
+      histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+      EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
+      histograms.add(e);
+      histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+      histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
+
+      histograms.add(new KllHistogram());
+      histograms.add(new SplineSketchHistogram(200));
+      histograms.add(new TDigestHistogram());
+
+      for (Histogram h : histograms) {
+        h.consume(ds.data().get());
+      }
+      return histograms;
+    }).dependsOn("goldstandard");
+
+    er.factor("rangeWidth", map -> {
+      var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+      float min = goldstandard.getMin();
+      float max = goldstandard.getMax();
+
+      List<Float> rangeWidths = new ArrayList<>();
+      int idx = -1;
+      float totalWidth = max-min;
+      float rangeWidth = (float) (totalWidth*1e-7);
+      while (rangeWidth < totalWidth) {
+        rangeWidths.add(rangeWidth);
+        rangeWidth *= 2;
+      }
+      return rangeWidths;
+    }).dependsOn("goldstandard");
+
+
+    // create visualizations
+    er.prepare().factors(List.of("dataset", "goldstandard", "histogram")).call(map -> {
+      try {
+        var ds = (Dataset)map.get("dataset");
+        var myout = out.sub(ds.desc.replace("/", "_"));
+        var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+
+        // visualizations
+        String vizDir = "viz/";
+        var candidate = (RankEstimator) map.get("histogram");
+
+        String tocEntry = null;
+        String tocDiffEntry = null;
+
+        String csv = candidate.debugAsCsv();
+        if (csv != null) {
+          File f = myout.fileAppend(vizDir + "/histogram-" + candidate.getDesc() + ".csv", csv);
+          tocEntry = f.getName() + "\t" + candidate.getDesc() + "\n";
+        }
+        String diffCsv = candidate.debugDiffAsCsv(goldstandard);
+        if (diffCsv != null) {
+          File f = myout.fileAppend(vizDir + "/histogram-" + candidate.getDesc() + "-diff.csv", diffCsv);
+          tocDiffEntry = f.getName() + "\t" + candidate.getDesc() + "\n";
+        }
+        return map.with("toc", tocEntry).with("tocDiff", tocDiffEntry);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(entry("histogram", (ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
+      var ds = (Dataset)map.get("dataset");
+      try {
+        var myout = out.sub(ds.desc.replace("/", "_"));
+        myout.fileAppend("desc.txt", ds.desc);
+
+        String vizDir = "viz/";
+
+        StringBuilder toc = new StringBuilder();
+        toc.append("file\tdesc\n");
+        StringBuilder tocDiff = new StringBuilder();
+        tocDiff.append("file\tdesc\n");
+
+        for (ExperimentRunner.MapArgument r : result) {
+          Object tocEntry = r.get("toc");
+          if (tocEntry != null) toc.append(tocEntry);
+          Object tocDiffEntry = r.get("tocDiff");
+          if (tocDiffEntry != null) tocDiff.append(tocDiffEntry);
+        }
+
+        myout.fileAppend(vizDir + "/toc.csv", toc.toString());
+        myout.fileAppend(vizDir + "/toc-diff.csv", tocDiff.toString());
+        Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      return map;
+    }))).run();
+
+
+    //er.call(List.of("dataset", "goldstandard", "histogram", "rangeWidth"), map -> {
+
+    //  System.out.println(map);
+
+    //  return map;
+    //}, new ExperimentRunner.MapArgument());
+
+    if (true) {
+      return;
+    }
 
     out.println("distribution: TODO" );
 
@@ -180,30 +319,14 @@ public class Main {
       rangeWidth *= 2;
     }
 
-    // visualizations
-    String vizDir = "viz/";
-    StringBuilder toc = new StringBuilder();
-    toc.append("file\tdesc\n");
-    StringBuilder tocDiff = new StringBuilder();
-    tocDiff.append("file\tdesc\n");
-    for (RankEstimator candidate : estimators) {
-      String csv = candidate.debugAsCsv();
-      if(csv != null) {
-        File f = out.fileAppend(vizDir + "/histogram-" + candidate.getDesc() + ".csv", csv);
-        toc.append(f.getName()).append("\t").append(candidate.getDesc()).append("\n");
-      }
-      String diffCsv = candidate.debugDiffAsCsv(goldstandard);
-      if(diffCsv != null) {
-        File f = out.fileAppend(vizDir + "/histogram-" + candidate.getDesc() + "-diff.csv", diffCsv);
-        tocDiff.append(f.getName()).append("\t").append(candidate.getDesc()).append("\n");
-      }
-    }
-
-    out.fileAppend(vizDir + "/toc.csv", toc.toString());
-    out.fileAppend(vizDir + "/toc-diff.csv", tocDiff.toString());
 
 
-    Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
+
+  }
+
+  private static Dataset loadTpcdsColumn(String path) {
+    String desc = path.replaceAll(".*sf", "sf").replace(".zstd", "");
+    return new Dataset(desc, FloatIteratorFactory.readFile(TPCDS_DUMP_PREFIX + path));
   }
 
   private static Supplier<FloatIterator> loadTpcdsColumn(String path, StringBuilder sbDescription) {
@@ -239,7 +362,7 @@ public class Main {
   private record DirLink(Path dir, String desc) implements TOCLink {
     @Override
     public String getHref(Path root) {
-      return TOCLink.relativize(dir, root);
+      return "/" + TOCLink.relativize(dir, root);
     }
 
     @Override
@@ -304,7 +427,11 @@ public class Main {
 
     for (TOCLink toc : tocs) {
       // get path relative to base for clean links
-      html.append("  <li><a href=\"").append(toc.getHref(root))
+      String href = toc.getHref(root);
+      if(href.contains("latest/latest")) {
+        System.out.println("here");
+      }
+      html.append("  <li><a href=\"").append(href)
           .append("\">")
           .append(toc.getText(base))
           .append("</a></li>\n");

@@ -14,10 +14,8 @@ import java.util.Objects;
 // TODO tr should close the resources
 public class ResultOutputCollector {
 
-  private final Path path;
-  private final OutputStream output;
 
-  public ResultOutputCollector(String basePath) throws IOException {
+  public static ResultOutputCollector of(String basePath) throws IOException {
     String path = basePath;
     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
     String hash = ShellUtils.exec("git", "rev-parse", "--short", "HEAD").trim();
@@ -34,6 +32,9 @@ public class ResultOutputCollector {
     File resultDir = Path.of(path).toFile();
     String fprefix = prefix;
     File[] files = resultDir.listFiles((dir, name) -> name.startsWith(fprefix));
+    if (files == null) {
+      System.out.println("here");
+    }
     for (File f : Objects.requireNonNull(files)) {
       String substring = f.getName().substring(prefix.length());
       int i = Integer.parseInt(substring);
@@ -41,8 +42,18 @@ public class ResultOutputCollector {
     }
 
     path = path+prefix+(max+1);
+    String info = "Result based on commit " + hash + (isCleanRepo ? " (clean)" : " (WITH MODIFICATIONS)");
 
-    this.path = Path.of(path);
+    return new ResultOutputCollector(Path.of(path), ".", info);
+  }
+
+  private final Path path;
+  private final OutputStream output;
+  private final String info;
+
+
+  private ResultOutputCollector(Path basePath, String subPath, String info) throws IOException {
+    this.path = basePath.resolve(subPath);
     this.path.toFile().mkdirs();
 
     System.out.println("Storing the results of the experiment in: " + this.path.toAbsolutePath());
@@ -51,7 +62,8 @@ public class ResultOutputCollector {
     File f = this.path.resolve("output.txt").toFile();
     output = new FileOutputStream(f);
 
-    println("Result based on commit " + hash + (isCleanRepo ? " (clean)" : " (WITH MODIFICATIONS)"));
+    this.info = info;
+    println(info);
   }
 
   public void println(Object... objs) throws IOException {
@@ -75,5 +87,9 @@ public class ResultOutputCollector {
 
   public Path getPath() {
     return path;
+  }
+
+  public ResultOutputCollector sub(String subpath) throws IOException {
+    return new ResultOutputCollector(this.path, subpath, this.info);
   }
 }

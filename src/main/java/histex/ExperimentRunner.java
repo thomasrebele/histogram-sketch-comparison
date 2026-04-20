@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import histex.ExperimentRunner.Argument;
@@ -120,11 +119,11 @@ public class ExperimentRunner<T extends Argument<T>> {
 
     Setter<T> setter = null;
 
-    BiFunction<T, List<T>, T> aggregator = null;
+    Aggregator defaultAggregator = null;
 
     public Function<T, Iterable<? extends Object>> lambda;
 
-    private boolean parallelizable = true;
+    private boolean parallelizable = false;
 
     /*protected Factor copy() {
       Factor f = new Factor();
@@ -137,8 +136,9 @@ public class ExperimentRunner<T extends Argument<T>> {
       return f;
     }*/
 
-    public void dependsOn(String prev) {
+    public Factor<T> dependsOn(String prev) {
       dependencies.add(prev);
+      return this;
     }
 
     @SuppressWarnings("unchecked")
@@ -155,8 +155,8 @@ public class ExperimentRunner<T extends Argument<T>> {
       return lambda.apply(map);
     }
 
-    public Factor<T> aggregate(BiFunction<T, List<T>, T> aggregator) {
-      this.aggregator = aggregator;
+    public Factor<T> defaultAggregator(Aggregator aggregator) {
+      this.defaultAggregator = aggregator;
       return this;
     }
 
@@ -215,62 +215,72 @@ public class ExperimentRunner<T extends Argument<T>> {
     return f;
   }
 
-  /** see other call function
-   * @throws CloneNotSupportedException */
-  public void call(List<String> factors, Consumer<T> lambda, T init) throws CloneNotSupportedException {
-    call(factors, map -> {
-      lambda.accept(map);
-      return null;
-    } , init);
+
+  interface Aggregator<T> extends BiFunction<T, List<T>, T> {
+
   }
 
-  /** Iterate over specified factors, and execute the lambda in the iterations of the last factor.
-   * The result will be stored in the result map.
-   * @return
-   * @throws CloneNotSupportedException
-   */
-  public List<T> call(List<String> factors, Function<T, T> lambda, T init) throws CloneNotSupportedException {
-    List<T> result = new ArrayList<>();
-    runRec(lambda, init, new ArrayList<>(), factors, result, 0);
-    return result;
+  /** Prepares the run */
+  class Prepare {
+    T init;
+    Function<T, T> lambda;
+    List<String> factors;
+
+    Map<String, Aggregator<T>> aggregators;
+
+    Prepare factors(List<String> factors) {
+      this.factors = factors;
+      return this;
+    }
+
+    /** Iterate over specified factors, and execute the lambda in the iterations of the last factor.
+     * The result will be stored in the result map.
+     * @return
+     * @throws CloneNotSupportedException
+     */
+    Prepare call(Function<T, T> lambda, T init) {
+      this.init = init;
+      this.lambda = lambda;
+      return this;
+    }
+
+    List<T> run() throws CloneNotSupportedException {
+      List<T> result = new ArrayList<>();
+      runRec(this, init, new ArrayList<>(), factors, result, 0);
+      return result;
+    }
+
+    Prepare aggregators(Map<String, Aggregator<T>> aggregators) {
+      this.aggregators = aggregators;
+      return this;
+    }
   }
 
-  /** see other call function
-   * @throws CloneNotSupportedException */
-  public void call(Consumer<T> lambda, T init) throws CloneNotSupportedException {
-    call(defaultFactors, map -> {
-      lambda.accept(map);
-      return null;
-    } , init);
+  public Prepare prepare() {
+    var prepare = new Prepare();
+    prepare.factors = defaultFactors;
+    return prepare;
   }
-
-  /**
-   * @throws CloneNotSupportedException
-   */
-  public List<T> call(Function<T, T> lambda, T init) throws CloneNotSupportedException {
-    return call(defaultFactors, lambda, init);
-  }
-
 
   /**
    * Take the arguments, iterate over first factor, and do the recursive calls.
    * At the end, result will contain aggregated results (or all results if factor has no aggregator)
-   * @param map
+   * @param arg
    * @param remainingFactors
    * @param result
    * @throws CloneNotSupportedException
    */
-  private void runRec(Function<T, T> finalLambda, T map, List<String> doneFactors, List<String> remainingFactors, List<T> result, int depth)
+  private void runRec(Prepare p, T arg, List<String> doneFactors, List<String> remainingFactors, List<T> result, int depth)
       throws CloneNotSupportedException {
     // after last factor: call lambdas
     if (remainingFactors.size() == 0) {
       try {
-        finalLambda.apply(map);
+        p.lambda.apply(arg);
       } catch (Exception e) {
-        System.out.println("exception in callee for arguments " + map);
+        System.out.println("exception in callee for arguments " + arg);
         e.printStackTrace();
       }
-      result.add(map);
+      result.add(arg);
       return;
     }
 
@@ -282,21 +292,21 @@ public class ExperimentRunner<T extends Argument<T>> {
       }
     }
     // iterate over its values
-    Iterable<? extends Object> it = f.values(map);
+    Iterable<? extends Object> it = f.values(arg);
     List<T> loopResult = new ArrayList<>();
     if (it != null) {
       // create a list of tasks, which run recursively
       List<Callable<List<T>>> outerTasks = new ArrayList<>();
       int idx = 0;
       for (Object o : it) {
-        T argCopy = map.copy();
+        T argCopy = arg.copy();
         f.set(argCopy, o, idx++);
 
         outerTasks.add(() -> {
           List<T> recursiveResult = new ArrayList<>();
           List<String> newDoneFactors = new ArrayList<>(doneFactors);
           newDoneFactors.add(remainingFactors.get(0));
-          runRec(finalLambda, argCopy, newDoneFactors, remainingFactors.subList(1, remainingFactors.size()), recursiveResult, depth + 1);
+          runRec(p, argCopy, newDoneFactors, remainingFactors.subList(1, remainingFactors.size()), recursiveResult, depth + 1);
           return recursiveResult;
         });
       }
@@ -335,9 +345,10 @@ public class ExperimentRunner<T extends Argument<T>> {
       }
     }
     // deal with result
-    if (f.aggregator != null) {
+    BiFunction<T, List<T>, T> aggregator = p.aggregators == null ? null : p.aggregators.getOrDefault(f.name, f.defaultAggregator);
+    if (aggregator != null) {
       // run aggregator
-      T tmpResult = f.aggregator.apply(map, loopResult);
+      T tmpResult = aggregator.apply(arg, loopResult);
       if (tmpResult != null) {
         result.add(tmpResult);
       }
@@ -399,16 +410,17 @@ public class ExperimentRunner<T extends Argument<T>> {
       return (Iterable<? extends Object>) values;
     }).dependsOn("dataset");
 
-    for (MapArgument x : e.call(Arrays.asList("dataset", "cost-function", "dependent"), map -> {
+    for (MapArgument x : e.prepare().factors(Arrays.asList("dataset", "cost-function", "dependent")).call(map -> {
       System.out.println(map);
       return map.with("x", "abc");
-    } , new MapArgument())) {
+    } , new MapArgument()).run()) {
       System.out.println(x);
     }
 
-    e.call(Arrays.asList("cost-function", "dataset", "whatever"), map -> {
+    e.prepare().factors(Arrays.asList("cost-function", "dataset", "whatever")).call(map -> {
       System.out.println(map);
-    } , new MapArgument());
+      return null;
+    } , new MapArgument()).run();
   }
 
 }

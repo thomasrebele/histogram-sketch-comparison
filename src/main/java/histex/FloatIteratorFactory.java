@@ -15,8 +15,18 @@ public class FloatIteratorFactory {
   public static Supplier<FloatIterator> readFile(String path) {
 
     // TODO tr close resources
-    return () -> {
+    return new FileFloatIteratorSupplier(path);
+  }
 
+  private static class FileFloatIteratorSupplier implements Supplier<FloatIterator> {
+    private final String path;
+
+    public FileFloatIteratorSupplier(String path) {
+      this.path = path;
+    }
+
+    @Override
+    public FloatIterator get() {
       try {
         InputStream fin = Files.newInputStream(Paths.get(path));
         BufferedInputStream in = new BufferedInputStream(fin);
@@ -24,14 +34,19 @@ public class FloatIteratorFactory {
         BufferedInputStream bf = new BufferedInputStream(zsIn);
         Scanner r = new Scanner(bf);
 
+
         return new FloatIterator() {
+          int i=0;
           @Override
           public float nextValue() {
+            i+=1;
             return r.nextFloat();
           }
 
           @Override
           public boolean hasNext() {
+            System.out.println("warning: read only the first 100 entries");
+            if (i>100) return false; // TODO tr remove
             return r.hasNext() && r.hasNextFloat();
           }
 
@@ -45,7 +60,11 @@ public class FloatIteratorFactory {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-    };
-  }
+    }
 
+    @Override
+    public String toString() {
+      return "data:" + path;
+    }
+  }
 }
