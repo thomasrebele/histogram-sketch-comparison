@@ -95,7 +95,7 @@ public class Main {
       "sf1/store_sales.ss_quantity.zstd"
   );
 
-  static List<String> TPCDS_DUMPS = TPCDS_DUMPS_TEST;
+  static List<String> TPCDS_DUMPS = TPCDS_DUMPS_TARGET;
 
   private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
 
@@ -266,6 +266,7 @@ public class Main {
     out.println("compare the multiplicative accuracy of range predicate selectivity");
     out.println();
     er.prepare().factors(List.of("dataset", "goldstandard", "rankEstimator", "rangeWidth")).call(map -> {
+      var ds = (Dataset)map.get("dataset");
       var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
       float min = goldstandard.getMin();
       float max = goldstandard.getMax();
@@ -280,23 +281,71 @@ public class Main {
 
       Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
           goldstandard, candidate, sequence.get(), rw);
-      String desc = String.format("%30s", candidate.getDesc());
-      String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));
       try {
-        out.println(desc + ": " + result);
-        out.fileAppend(rangeDir + "/samples-" + candidate.getDesc(), samples);
+        var myout = out.sub(ds.desc.replace("/", "_"));
+        String desc = String.format("%30s", candidate.getDesc());
+        String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));
+        myout.println(desc + ": " + result);
+        myout.fileAppend(rangeDir + "/samples-" + candidate.getDesc(), samples);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
 
       return map.with("result", result);
-    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(entry("rangeWidth",(ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
+    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(
+        entry("rangeWidth",(ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
 
-      
+      var candidate = (RankEstimator) map.get("rankEstimator");
+      String vizDir = "viz/";
+      String file =  candidate.getDesc() + ".csv";
 
+      try {
+        var sb = new StringBuilder();
+        sb.append("x,y\n");
 
-      return map;
-    } ))).run();
+        var ds = (Dataset)map.get("dataset");
+        var myout = out.sub(ds.desc.replace("/", "_"));
+        for (ExperimentRunner.MapArgument r : result) {
+          Measure.Result mr = (Measure.Result) r.get("result");
+          float rw = ((Pair<Float, Integer>)r.get("rangeWidth")).getLeft();
+          if (Double.isFinite(mr.scaleDiff())) {
+            sb.append(rw).append(",").append(mr.scaleDiff()).append("\n");
+          }
+        }
+
+        myout.fileAppend(vizDir + file, sb.toString());
+
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+      String tocEntry = file + "\t" + candidate.getDesc() + "\n";
+      return map.with("toc", tocEntry);
+    }),
+      entry("rankEstimator", (ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
+
+        String vizDir = "viz/";
+        var ds = (Dataset)map.get("dataset");
+        try {
+          var myout = out.sub(ds.desc.replace("/", "_"));
+          StringBuilder toc = new StringBuilder();
+          toc.append("file\tdesc\n");
+
+          for(ExperimentRunner.MapArgument r : result) {
+            Object tocEntry = r.get("toc");
+            if (tocEntry != null) {
+              toc.append(tocEntry);
+            }
+          }
+
+          myout.fileAppend(vizDir + "/toc.csv", toc.toString());
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+
+        return map;
+          }
+      ))).run();
 
     Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
 

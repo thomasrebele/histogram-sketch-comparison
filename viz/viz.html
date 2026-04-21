@@ -63,8 +63,8 @@
       // parse parameters
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
-      
       const toc = params.get('toc');
+      document.title="visualizer " + toc;
       
       console.log(`toc: ${toc}`);
 
