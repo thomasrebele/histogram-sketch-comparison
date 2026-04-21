@@ -4,6 +4,7 @@ import histex.sketches.EquiWidthHistogram;
 import histex.sketches.KllHistogram;
 import histex.sketches.SplineSketchHistogram;
 import histex.sketches.TDigestHistogram;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,33 +27,19 @@ import static java.util.Map.entry;
 
 public class Main {
 
-  static List<String> TPCDS_DUMPS = Arrays.asList(
+  static List<String> TPCDS_DUMPS_OTHERS = Arrays.asList(
       "sf100000/item.i_brand_id.zstd",
       "sf100000/item.i_category_id.zstd",
       "sf100000/item.i_class_id.zstd",
-      "sf100000/item.i_current_price.zstd",
       "sf100000/item.i_item_sk.zstd",
       "sf100000/item.i_manager_id.zstd",
-      "sf100000/item.i_manufact_id.zstd",
       "sf100000/item.i_rec_end_date.zstd",
       "sf100000/item.i_rec_start_date.zstd",
       "sf100000/item.i_wholesale_cost.zstd",
-      "sf100000/store.s_number_employees.zstd",
-      "sf100000/web_page.wp_char_count.zstd",
-      "sf100/customer_address.ca_zip.zstd",
-      "sf10/catalog_returns.cr_return_amount.zstd",
-      "sf10/store_returns.sr_return_amt.zstd",
       "sf10/store_sales.ss_store_sk.zstd",
       "sf10/store_sales.ss_ticket_number.zstd",
-      "sf10/web_returns.wr_return_amt.zstd",
-      "sf10/web_sales.ws_quantity.zstd",
-      "sf1/catalog_sales.cs_net_paid.zstd",
-      "sf1/catalog_sales.cs_net_profit.zstd",
-      "sf1/catalog_sales.cs_quantity.zstd",
-      "sf1/inventory.inv_quantity_on_hand.zstd",
       "sf1/store_sales.ss_addr_sk.zstd",
       "sf1/store_sales.ss_cdemo_sk.zstd",
-      "sf1/store_sales.ss_coupon_amt.zstd",
       "sf1/store_sales.ss_customer_sk.zstd",
       "sf1/store_sales.ss_ext_discount_amt.zstd",
       "sf1/store_sales.ss_ext_list_price.zstd",
@@ -61,17 +48,18 @@ public class Main {
       "sf1/store_sales.ss_ext_wholesale_cost.zstd",
       "sf1/store_sales.ss_hdemo_sk.zstd",
       "sf1/store_sales.ss_item_sk.zstd",
-      "sf1/store_sales.ss_list_price.zstd",
       "sf1/store_sales.ss_net_paid_inc_tax.zstd",
-      "sf1/store_sales.ss_net_paid.zstd",
-      "sf1/store_sales.ss_net_profit.zstd",
       "sf1/store_sales.ss_promo_sk.zstd",
-      "sf1/store_sales.ss_quantity.zstd",
-      "sf1/store_sales.ss_sales_price.zstd",
-      "sf1/store_sales.ss_sold_time_sk.zstd",
-      "sf1/store_sales.ss_wholesale_cost.zstd",
-      "sf1/web_sales.ws_net_paid.zstd",
-      "sf1/web_sales.ws_net_profit.zstd",
+      "sf1/store_sales.ss_sold_time_sk.zstd"
+  );
+
+
+  static List<String> TPCDS_DUMPS_TARGET = Arrays.asList(
+      "sf100/customer_address.ca_zip.zstd",
+      "sf10/catalog_returns.cr_return_amount.zstd",
+      "sf1/catalog_sales.cs_net_paid.zstd",
+      "sf1/catalog_sales.cs_net_profit.zstd",
+      "sf1/catalog_sales.cs_quantity.zstd",
       "tiny/date_dim.d_date.zstd",
       "tiny/date_dim.d_dom.zstd",
       "tiny/date_dim.d_month_seq.zstd",
@@ -81,10 +69,33 @@ public class Main {
       "tiny/household_demographics.hd_vehicle_count.zstd",
       "tiny/income_band.ib_lower_bound.zstd",
       "tiny/income_band.ib_upper_bound.zstd",
+      "sf100000/item.i_current_price.zstd",
+      "sf100000/item.i_manufact_id.zstd",
+      "sf1/inventory.inv_quantity_on_hand.zstd",
+      "sf100000/store.s_number_employees.zstd",
+      "sf10/store_returns.sr_return_amt.zstd",
+      "sf1/store_sales.ss_coupon_amt.zstd",
+      "sf1/store_sales.ss_list_price.zstd",
+      "sf1/store_sales.ss_net_paid.zstd",
+      "sf1/store_sales.ss_net_profit.zstd",
+      "sf1/store_sales.ss_quantity.zstd",
+      "sf1/store_sales.ss_sales_price.zstd",
+      "sf1/store_sales.ss_wholesale_cost.zstd",
       "tiny/time_dim.t_hour.zstd",
       "tiny/time_dim.t_minute.zstd",
-      "tiny/time_dim.t_time.zstd"
+      "tiny/time_dim.t_time.zstd",
+      "sf100000/web_page.wp_char_count.zstd",
+      "sf10/web_returns.wr_return_amt.zstd",
+      "sf1/web_sales.ws_net_paid.zstd",
+      "sf1/web_sales.ws_net_profit.zstd",
+      "sf10/web_sales.ws_quantity.zstd"
   );
+
+  static List<String> TPCDS_DUMPS_TEST = Arrays.asList(
+      "sf1/store_sales.ss_quantity.zstd"
+  );
+
+  static List<String> TPCDS_DUMPS = TPCDS_DUMPS_TEST;
 
   private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
 
@@ -98,10 +109,9 @@ public class Main {
     histograms.add(new EquiWidthHistogram(min, max, 1200, true));
     histograms.add(new EquiWidthHistogram(min, max, 600, true));
     histograms.add(new EquiWidthHistogram(min, max, 200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 11, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 11, true));
     histograms.add(new EquiWidthHistogram(min, max, 1200, false));
-    EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
-    histograms.add(e);
+    //histograms.add(new EquiWidthHistogram(min, max, 11, false));
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
@@ -181,12 +191,13 @@ public class Main {
       float min = goldstandard.getMin();
       float max = goldstandard.getMax();
 
-      List<Float> rangeWidths = new ArrayList<>();
+      List<Pair<Float, Integer>> rangeWidths = new ArrayList<>();
       int idx = -1;
       float totalWidth = max-min;
       float rangeWidth = (float) (totalWidth*1e-7);
       while (rangeWidth < totalWidth) {
-        rangeWidths.add(rangeWidth);
+        idx += 1;
+        rangeWidths.add(Pair.of(rangeWidth, idx));
         rangeWidth *= 2;
       }
       return rangeWidths;
@@ -247,7 +258,45 @@ public class Main {
         throw new RuntimeException(e);
       }
       return map;
-    }))).run();
+    })))
+    //.run()
+    ;
+
+    out.println("");
+    out.println("compare the multiplicative accuracy of range predicate selectivity");
+    out.println();
+    er.prepare().factors(List.of("dataset", "goldstandard", "rankEstimator", "rangeWidth")).call(map -> {
+      var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
+      float min = goldstandard.getMin();
+      float max = goldstandard.getMax();
+      Pair<Float, Integer> rangeWidth = (Pair<Float, Integer>)map.get("rangeWidth");
+      float rw = rangeWidth.getLeft();
+      int idx = rangeWidth.getRight();
+
+      Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(min, max - rw, 10000);
+
+      String rangeDir = "/" + String.format("%02d", idx) + "-range-" + rangeWidth;
+      RankEstimator candidate = (RankEstimator) map.get("rankEstimator");
+
+      Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
+          goldstandard, candidate, sequence.get(), rw);
+      String desc = String.format("%30s", candidate.getDesc());
+      String samples = Arrays.stream(result.samples()).map(Object::toString).collect(Collectors.joining("\n"));
+      try {
+        out.println(desc + ": " + result);
+        out.fileAppend(rangeDir + "/samples-" + candidate.getDesc(), samples);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+      return map.with("result", result);
+    }, new ExperimentRunner.MapArgument()).aggregators(Map.ofEntries(entry("rangeWidth",(ExperimentRunner.Aggregator<ExperimentRunner.MapArgument>) (map, result) -> {
+
+      
+
+
+      return map;
+    } ))).run();
 
     Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
 
@@ -274,10 +323,9 @@ public class Main {
     histograms.add(new EquiWidthHistogram(min, max, 1200, true));
     histograms.add(new EquiWidthHistogram(min, max, 600, true));
     histograms.add(new EquiWidthHistogram(min, max, 200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 11, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 11, true));
     histograms.add(new EquiWidthHistogram(min, max, 1200, false));
-    EquiWidthHistogram e = new EquiWidthHistogram(min, max, 11, false);
-    histograms.add(e);
+    //histograms.add(new EquiWidthHistogram(min, max, 11, false));
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
     histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
