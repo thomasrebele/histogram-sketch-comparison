@@ -1,0 +1,5 @@
+Result based on commit 82a0e97 (clean)
+seed: -4000877520567003086
+
+compare the multiplicative accuracy of range predicate selectivity
+
