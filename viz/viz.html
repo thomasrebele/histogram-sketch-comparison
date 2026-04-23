@@ -164,7 +164,7 @@
             .attr("cx", d=>xScale(d.x)).attr("cy", d=>yScale(d.y));
 
           // zooming, sometimes only works when clicking within a region surrounded by plot lines
-          const zoom = d3.zoom().scaleExtent([0.05, 200]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
+          const zoom = d3.zoom().scaleExtent([0.005, 100000]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
           svg.call(zoom);
 
           function zoomed(event) {

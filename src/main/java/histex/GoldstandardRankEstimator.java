@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 public class GoldstandardRankEstimator implements RankEstimator {
 
   private final ArrayList<Float> values;
+  private final float minimalDist;
 
   public GoldstandardRankEstimator(Supplier<? extends FloatIterator> supplier) {
     FloatIterator it = supplier.get();
@@ -18,6 +19,13 @@ public class GoldstandardRankEstimator implements RankEstimator {
     while (it.hasNext()) {
       values.add(it.nextValue());
     }
+
+    float minimalDist = Float.MAX_VALUE;
+    for (int i=1; i<values.size(); i++) {
+      minimalDist = Float.min(minimalDist, values.get(i)-values.get(i-1));
+    }
+    this.minimalDist = minimalDist;
+
     Collections.sort(values);
   }
 
@@ -27,6 +35,10 @@ public class GoldstandardRankEstimator implements RankEstimator {
 
   float getMax() {
     return values.get(values.size()-1);
+  }
+
+  float getMinimalDist() {
+    return minimalDist;
   }
 
   @Override

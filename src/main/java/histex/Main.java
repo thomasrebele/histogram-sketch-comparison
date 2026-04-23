@@ -106,14 +106,18 @@ public class Main {
     float max = goldstandard.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
-    histograms.add(new EquiWidthHistogram(min, max, 1200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 600, true));
-    histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 600, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+
+    //// low res
     //histograms.add(new EquiWidthHistogram(min, max, 11, true));
-    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
     //histograms.add(new EquiWidthHistogram(min, max, 11, false));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
+
+    //// equi-height
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
     histograms.add(new KllHistogram());
     histograms.add(new SplineSketchHistogram(200));
@@ -190,16 +194,21 @@ public class Main {
       var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
       float min = goldstandard.getMin();
       float max = goldstandard.getMax();
+      float minDist = goldstandard.getMinimalDist();;
 
-      List<Pair<Float, Integer>> rangeWidths = new ArrayList<>();
-      int idx = -1;
+      List<Float> rangeWidths = new ArrayList<>();
       float totalWidth = max-min;
-      float rangeWidth = (float) (totalWidth*1e-7);
-      while (rangeWidth < totalWidth) {
-        idx += 1;
-        rangeWidths.add(Pair.of(rangeWidth, idx));
-        rangeWidth *= 2;
+      float rangeWidth = totalWidth;
+      float factor = 0.75f;
+      while (rangeWidth >= minDist) {
+        rangeWidths.add(rangeWidth);
+        rangeWidth *= factor;
+        if (rangeWidth <= 0.3*totalWidth) {
+          factor = 0.95f;
+        }
       }
+      System.out.println(rangeWidths);
+      rangeWidths.sort(Comparator.naturalOrder());
       return rangeWidths;
     }).dependsOn("goldstandard");
 
@@ -270,13 +279,12 @@ public class Main {
       var goldstandard = (GoldstandardRankEstimator) map.get("goldstandard");
       float min = goldstandard.getMin();
       float max = goldstandard.getMax();
-      Pair<Float, Integer> rangeWidth = (Pair<Float, Integer>)map.get("rangeWidth");
-      float rw = rangeWidth.getLeft();
-      int idx = rangeWidth.getRight();
+      float rw = (Float) map.get("rangeWidth");
+      int idx = map.index("rangeWidth");
 
       Supplier<FloatIterator> sequence = () -> FloatIterator.sequence(min, max - rw, 10000);
 
-      String rangeDir = "/" + String.format("%02d", idx) + "-range-" + rangeWidth;
+      String rangeDir = "/" + String.format("%02d", idx) + "-range-" + rw;
       RankEstimator candidate = (RankEstimator) map.get("rankEstimator");
 
       Measure.Result result = Measure.evaluateMultiplicativeSelectivityDifference(
@@ -307,7 +315,7 @@ public class Main {
         var myout = out.sub(ds.desc.replace("/", "_"));
         for (ExperimentRunner.MapArgument r : result) {
           Measure.Result mr = (Measure.Result) r.get("result");
-          float rw = ((Pair<Float, Integer>)r.get("rangeWidth")).getLeft();
+          float rw = (float) r.get("rangeWidth");
           if (Double.isFinite(mr.scaleDiff())) {
             sb.append(rw).append(",").append(mr.scaleDiff()).append("\n");
           }
@@ -369,14 +377,18 @@ public class Main {
     float max = goldstandard.getMax();
 
     List<Histogram> histograms = new ArrayList<>();
-    histograms.add(new EquiWidthHistogram(min, max, 1200, true));
-    histograms.add(new EquiWidthHistogram(min, max, 600, true));
-    histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 600, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 200, true));
+    //histograms.add(new EquiWidthHistogram(min, max, 1200, false));
+
+    //// low res
     //histograms.add(new EquiWidthHistogram(min, max, 11, true));
-    histograms.add(new EquiWidthHistogram(min, max, 1200, false));
     //histograms.add(new EquiWidthHistogram(min, max, 11, false));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
-    histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
+
+    //// equi-height
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, true));
+    //histograms.add(goldstandard.convertToEquiHeightHistogram(200, false));
 
     histograms.add(new KllHistogram());
     histograms.add(new SplineSketchHistogram(200));
