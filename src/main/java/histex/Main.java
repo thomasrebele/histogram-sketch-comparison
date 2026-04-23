@@ -92,10 +92,10 @@ public class Main {
   );
 
   static List<String> TPCDS_DUMPS_TEST = Arrays.asList(
-      "sf1/store_sales.ss_quantity.zstd"
+      "tiny/date_dim.d_date.zstd"
   );
 
-  static List<String> TPCDS_DUMPS = TPCDS_DUMPS_TARGET;
+  static List<String> TPCDS_DUMPS = TPCDS_DUMPS_TEST;
 
   private static final String TPCDS_DUMP_PREFIX = "src/main/resources/tpcds-column-dumps/";
 
@@ -436,6 +436,10 @@ public class Main {
 
   private static Dataset loadTpcdsColumn(String path) {
     String desc = path.replaceAll(".*sf", "sf").replace(".zstd", "");
+    if (path.contains("d_date.zstd")) {
+      return new Dataset(desc, FloatIteratorFactory.readDateFile(TPCDS_DUMP_PREFIX + path));
+    }
+
     return new Dataset(desc, FloatIteratorFactory.readFile(TPCDS_DUMP_PREFIX + path));
   }
 

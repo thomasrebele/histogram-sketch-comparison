@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.function.Supplier;
 
 public class FloatIteratorFactory {
@@ -17,6 +20,12 @@ public class FloatIteratorFactory {
 
     // TODO tr close resources
     return new FileFloatIteratorSupplier(path);
+  }
+
+  public static Supplier<FloatIterator> readDateFile(String path) {
+
+    // TODO tr close resources
+    return new FileDateToFloatIteratorSupplier(path);
   }
 
   private static class FileFloatIteratorSupplier implements Supplier<FloatIterator> {
@@ -46,6 +55,82 @@ public class FloatIteratorFactory {
 
 
             float result = Float.parseFloat(nextLine);
+            nextLine = null;
+            return result;
+          }
+
+          @Override
+          public boolean hasNext() {
+            advance();
+            if ("#done".equals(nextLine)) {
+              return false;
+            }
+
+            return nextLine != null;
+          }
+
+          private void advance() {
+            if (nextLine == null) {
+              try {
+                nextLine = r.readLine();
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            }
+          }
+
+          @Override
+          public void close() throws IOException {
+            r.close();
+            zsIn.close();
+          }
+        };
+
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Override
+    public String toString() {
+      return "data:" + path;
+    }
+  }
+
+  private static DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+
+  private static class FileDateToFloatIteratorSupplier implements Supplier<FloatIterator> {
+    private final String path;
+
+    public FileDateToFloatIteratorSupplier(String path) {
+      this.path = path;
+    }
+
+    @Override
+    public FloatIterator get() {
+      try {
+        InputStream fin = Files.newInputStream(Paths.get(path));
+        BufferedInputStream in = new BufferedInputStream(fin, 1<<16);
+        ZstdCompressorInputStream zsIn = new ZstdCompressorInputStream(in);
+        BufferedInputStream bf = new BufferedInputStream(zsIn, 1<<16);
+        BufferedReader r = new BufferedReader(new InputStreamReader(bf));
+
+        return new FloatIterator() {
+          private String nextLine = null;
+
+          int i=0;
+          @Override
+          public float nextValue() {
+            i+=1;
+            advance();
+
+            float result = 0;
+            try {
+              result = df1.parse(nextLine).getTime();
+            } catch (ParseException e) {
+              throw new RuntimeException(e);
+            }
+
             nextLine = null;
             return result;
           }
