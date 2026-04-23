@@ -87,15 +87,18 @@
       const legendContainer = svg.append("g").attr("transform", "translate(250,0)");
 
       // load data
-      var basePath = "/";
+      var basePath = new URL(document.URL).pathname;
+      basePath = basePath.substring(0, basePath.lastIndexOf('/')+1)
+      console.log("basePath1", basePath);
+
       if(toc.lastIndexOf("/") >= 0) {
-        basePath = "/" + toc.substr(0,toc.lastIndexOf("/")+1);
+        basePath = basePath + toc.substr(0,toc.lastIndexOf("/")+1);
       }
 
       console.log("basePath", basePath);
       console.log("toc", toc);
 
-      d3.dsv("\t", "/" + toc).then(function(toc) {
+      d3.dsv("\t", toc).then(function(toc) {
         console.log(toc);
         const data = toc.map(el => d3.csv(basePath+el.file, d => {return {x:+d.x, y:+d.y}}));
         Promise.all(data).then(csv_data => {

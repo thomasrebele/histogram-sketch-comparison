@@ -150,10 +150,11 @@ public class Main {
   public static void main(String[] args) throws IOException, CloneNotSupportedException {
     String rootPath = "draft-results/";
 
-    //if (true) {
-    //  Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
-    //  return;
-    //}
+    if (true) {
+      rootPath = "results/";
+      Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
+      return;
+    }
 
     ResultOutputCollector out = ResultOutputCollector.of(rootPath);
     StringBuilder sbDescription = new StringBuilder();
@@ -476,7 +477,7 @@ public class Main {
     @Override
     public String getHref(Path root) {
       String vizPath = root.relativize(viz).toString();
-      return "/" + vizPath + "?toc=" + TOCLink.relativize(toc, root);
+      return vizPath + "?toc=" + TOCLink.relativize(toc, viz.getParent());
     }
 
     @Override
@@ -488,7 +489,7 @@ public class Main {
   private record DirLink(Path dir, String desc) implements TOCLink {
     @Override
     public String getHref(Path root) {
-      return "/" + TOCLink.relativize(dir, root);
+      return TOCLink.relativize(dir, root);
     }
 
     @Override
@@ -551,20 +552,19 @@ public class Main {
     String headline = context == null ? "TOC" : context;
     html.append("<body>\n<h1>").append(headline).append("</h1><h2>").append(root.relativize(base)).append("</h2>\n<ul>\n");
 
+    Path landingPage = base.resolve("index.html");
     for (TOCLink toc : tocs) {
       // get path relative to base for clean links
-      String href = toc.getHref(root);
-      if(href.contains("latest/latest")) {
-        System.out.println("here");
-      }
+      String href = toc.getHref(base);
+      String text = toc.getText(base);
       html.append("  <li><a href=\"").append(href)
           .append("\">")
-          .append(toc.getText(base))
+          .append(text)
           .append("</a></li>\n");
     }
 
     html.append("</ul>\n</body></html>");
-    Files.write(base.resolve("index.html"), html.toString().getBytes());
+    Files.write(landingPage, html.toString().getBytes());
   }
 
   private static String fmt(double v) {
