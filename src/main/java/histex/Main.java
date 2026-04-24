@@ -151,8 +151,7 @@ public class Main {
     String rootPath = "draft-results/";
 
     if (true) {
-      rootPath = "results/";
-      Main.createLandingPages(Path.of(rootPath), Path.of(rootPath), null, null);
+      Main.createLandingPages(Path.of("."), Path.of("results/"), Path.of("viz/viz.html"), null);
       return;
     }
 
