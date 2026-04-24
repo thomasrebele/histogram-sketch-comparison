@@ -488,7 +488,11 @@ public class Main {
   private record DirLink(Path dir, String desc) implements TOCLink {
     @Override
     public String getHref(Path root) {
-      return TOCLink.relativize(dir, root);
+      String path = TOCLink.relativize(dir, root);
+      if (!path.endsWith("/")) {
+        path = path + "/";
+      }
+      return path;
     }
 
     @Override
