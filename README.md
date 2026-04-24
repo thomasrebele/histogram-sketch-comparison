@@ -3,6 +3,10 @@ Histogram comparison
 
 ## Displaying the diagrams
 
+Go to <a href="https://raw.githack.com/thomasrebele/histogram-sketch-comparison/main/results/">a rendering of this repository</a>.
+
+## Display the diagrams locally
+
 Start an HTTP server in the directory results/, e.g.
 
 ```
